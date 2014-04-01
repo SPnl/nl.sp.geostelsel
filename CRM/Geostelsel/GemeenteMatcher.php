@@ -4,7 +4,7 @@
  * This class find target ID's for the automatic relationship based on the custom field gemeente
  */
 
-class CRM_Autorelationship_GemeenteMatcher extends CRM_Autorelationship_Matcher {
+class CRM_Geostelsel_GemeenteMatcher extends CRM_Autorelationship_Matcher {
   
   protected $objAddress;
   
@@ -44,7 +44,7 @@ class CRM_Autorelationship_GemeenteMatcher extends CRM_Autorelationship_Matcher 
     parent::__construct($interface);    
     $this->autogroup_id = $this->getCustomGroupIdByName('autorelationship_gemeente_based');
     $this->addressfield_id = $this->getCustomFieldIdByNameAndGroup('Address_ID', $this->autogroup_id);
-    $this->postcodenl_group = $this->getCustomGroupByName('Adresgegevens');
+    $this->postcodenl_group = $this->getCustomGroupByName('Adresgegevens', 'Address');
     $this->gemeente_field = $this->getCustomFieldByNameAndGroup('Gemeente', $this->postcodenl_group['id']);
   }
   
@@ -58,7 +58,7 @@ class CRM_Autorelationship_GemeenteMatcher extends CRM_Autorelationship_Matcher 
       $this->objAddress = $this->data['address'];
       
       //find gemeente
-      $custom_values = CRM_Core_BAO_CustomValueTable::getEntityValues($this->objAddress->id, 'civicrm_address', $this->gemeente_field['id']);
+      $custom_values = CRM_Core_BAO_CustomValueTable::getEntityValues($this->objAddress->id, 'Address', $this->gemeente_field['id']);
       $this->objAddress->gemeente = '';
       if (isset($custom_values[$this->gemeente_field['id']])) {
         $this->objAddress->gemeente = $custom_values[$this->gemeente_field['id']];
@@ -83,14 +83,13 @@ class CRM_Autorelationship_GemeenteMatcher extends CRM_Autorelationship_Matcher 
     if (!isset($this->objAddress)) {
       throw new Exception('Address not set');
     }    
-    $objAddress = $this->objAddress;
     
-    if ($objAddress->country_id != 1152) {
+    if ($this->objAddress->country_id != 1152) {
       return array(); //do not match if the country of the address is outside Netherlands
     }
     
     //do not match when address is not a primary address
-    if ($objAddress->is_primary != '1') {
+    if ($this->objAddress->is_primary != '1') {
       return array();
     }
     
@@ -101,7 +100,7 @@ class CRM_Autorelationship_GemeenteMatcher extends CRM_Autorelationship_Matcher 
     
     
 
-    $sql = "SELECT * FROM `civicrm_autorelationship_contact_gemeente` WHERE LOWER(`gemeente`) = LOWER('".$objAddress->gemeente."')";
+    $sql = "SELECT * FROM `civicrm_autorelationship_contact_gemeente` WHERE LOWER(`gemeente`) = LOWER('".$this->objAddress->gemeente."')";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
     $return = array();

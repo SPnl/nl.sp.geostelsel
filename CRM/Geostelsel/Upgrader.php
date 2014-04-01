@@ -18,6 +18,8 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
       'is_reserved' => '1',
       'description' => 'Automatische relatie op basis van gemeente',
     ));
+    
+    $this->executeCustomDataFileByAbsPath($this->extensionDir . '/xml/relationship_fields.xml');
   }
 
   /**
