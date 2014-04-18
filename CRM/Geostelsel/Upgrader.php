@@ -14,12 +14,35 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
   public function install() {
     $this->executeSqlFile('sql/geostelsel_install.sql');
     
+    $this->addRelationships();    
+    
+    $this->executeCustomDataFileByAbsPath($this->extensionDir . '/xml/relationship_fields.xml');
+  }
+  
+  public function upgrade_1001() {
+    $this->addRelationships();
+    $this->executeSqlFile('sql/upgrade_1001.sql');
+    return true;
+  }
+  
+  public function upgrade_1002() {
+    $this->executeCustomDataFile('xml/upgrade_1002.xml');
+    return true;
+  }
+  
+  protected function addRelationships() {
     $this->addRelationshipType('gemeente_based', 'Op basis van gemeente', 'gemeente_based', 'Op basis van gemeente', array(
       'is_reserved' => '1',
       'description' => 'Automatische relatie op basis van gemeente',
     ));
-    
-    $this->executeCustomDataFileByAbsPath($this->extensionDir . '/xml/relationship_fields.xml');
+    $this->addRelationshipType('local_based', 'Lid van lokaal', 'local_based', 'Lid van lokaal', array(
+      'is_reserved' => '1',
+      'description' => 'Automatische relatie op basis van lokaal lidmaatschap',
+    ));
+    $this->addRelationshipType('local_regio', 'Onder regio', 'regio_local', 'Bevat lokale afdeling', array(
+      'is_reserved' => '1',
+      'description' => 'Relatie voor lokale afdeling-regio',
+    ));
   }
 
   /**

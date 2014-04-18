@@ -140,6 +140,7 @@ function geostelsel_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  */
 function geostelsel_autorelationship_targetinterfaces(&$interfaces) {
   $interfaces[] = new CRM_Geostelsel_GemeenteTarget();
+  $interfaces[] = new CRM_Geostelsel_LocalTarget();
 }
 
 /**
@@ -147,9 +148,31 @@ function geostelsel_autorelationship_targetinterfaces(&$interfaces) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
  */
 function geostelsel_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
-  if ($objectName == 'Address' && $objectRef instanceof CRM_Core_DAO_Address) {
-    $factory = CRM_Autorelationship_TargetFactory::singleton();
+  $factory = CRM_Autorelationship_TargetFactory::singleton();
+  if ($objectName == 'Address' && $objectRef instanceof CRM_Core_DAO_Address) {  
     $matcher = $factory->getMatcherForEntity('gemeente', array('address' => $objectRef));
     $matcher->matchAndCreateForSourceContact();
+  }
+  if ($objectName == 'Relationship' && $objectRef instanceof CRM_Contact_DAO_Relationship) {
+    $matcherTypes = CRM_Geostelsel_LocalMatcher::getMatchRelationshipTypeIds();
+    $matcherTypeRegioRelationship = CRM_Geostelsel_LocalMatcher::getLocalRegioRelationshipTypeId();
+    if (in_array($objectRef->relationship_type_id, $matcherTypes)) {
+      //de relatie is een lid van op basis van gemeente e.d.
+      //gebruik contact_id_a van deze relatie als een source contact
+      $matcher = $factory->getMatcherForEntity('local_regio', array('relationship' => $objectRef));
+      $matcher->matchAndCreateForSourceContact();
+    } elseif ($objectRef->relationship_type_id == $matcherTypeRegioRelationship) {
+      //de relatie is een relatie van type lokaal/regio
+      //gebruik contact_id_b van de relatie als de target contact id
+      $interface = $factory->getInterfaceForEntity('local_regio');
+      $matcher = $interface->getMatcher();
+      
+      //find the entityID of a rule on the target (if not found do not do any matching)
+      //if configured correctly there is only one rule
+      $rules = $interface->listEntitiesForTarget($objectRef->contact_id_b);
+      foreach($rules as $rule) {  
+        $matcher->matchAndCreateForTargetContactAndEntityId($objectRef->contact_id_b, $rule['entity_id']);
+      }
+    }
   }
 }

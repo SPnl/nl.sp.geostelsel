@@ -6,4 +6,10 @@
     <title>Add gemeente for automatic relationship</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/autorelationship/addrule/local_regio</path>
+    <page_callback>CRM_Geostelsel_Form_AddLocalTargetRule</page_callback>
+    <title>Add automatic relationship for local/regio relations</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>
