@@ -16,7 +16,7 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
     
     $this->addRelationships();    
     
-    $this->executeCustomDataFileByAbsPath($this->extensionDir . '/xml/relationship_fields.xml');
+    $this->executeCustomDataFile('xml/relationship_fields.xml');
   }
   
   public function upgrade_1001() {
@@ -31,11 +31,11 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
   }
   
   protected function addRelationships() {
-    $this->addRelationshipType('gemeente_based', 'Op basis van gemeente', 'gemeente_based', 'Op basis van gemeente', array(
+    $this->addRelationshipType('gemeente_based', 'Op basis van gemeente (A-B)', 'gemeente_based', 'Op basis van gemeente (B-A)', array(
       'is_reserved' => '1',
       'description' => 'Automatische relatie op basis van gemeente',
     ));
-    $this->addRelationshipType('local_based', 'Lid van lokaal', 'local_based', 'Lid van lokaal', array(
+    $this->addRelationshipType('local_based', 'Lid van lokaal', 'local_based', 'Bevat lokaal-lid', array(
       'is_reserved' => '1',
       'description' => 'Automatische relatie op basis van lokaal lidmaatschap',
     ));

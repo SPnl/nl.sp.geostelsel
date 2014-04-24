@@ -203,7 +203,7 @@ class CRM_Geostelsel_LocalMatcher extends CRM_Autorelationship_Matcher {
     $arrRelationshipParams['custom_'.$this->relationshipfield_id] = $this->objRelationship->id;
     $arrRelationshipParams['is_permission_b_a'] = '1';
     
-    $arrRelationshipParams['start_date'] = "";
+    /*$arrRelationshipParams['start_date'] = "";
     if (!empty($this->objRelationship->start_date) && strtoupper($this->objRelationship->start_date) != "NULL") {
       $startDate = new DateTime($this->objRelationship->start_date);
       $arrRelationshipParams['start_date'] = $startDate->format('YmdHis');
@@ -216,8 +216,7 @@ class CRM_Geostelsel_LocalMatcher extends CRM_Autorelationship_Matcher {
     $arrRelationshipParams['is_active'] = 1;
     if (empty($this->objRelationship->is_active)) {
       $arrRelationshipParams['is_active'] = 0;
-    }
-    //var_dump($arrRelationshipParams); exit();
+    }*/
   }
   
   /**
