@@ -140,7 +140,6 @@ function geostelsel_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  */
 function geostelsel_autorelationship_targetinterfaces(&$interfaces) {
   $interfaces[] = new CRM_Geostelsel_GemeenteTarget();
-  $interfaces[] = new CRM_Geostelsel_LocalTarget();
 }
 
 /**
@@ -153,26 +152,31 @@ function geostelsel_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
     $matcher = $factory->getMatcherForEntity('gemeente', array('address' => $objectRef));
     $matcher->matchAndCreateForSourceContact();
   }
-  if ($objectName == 'Relationship' && $objectRef instanceof CRM_Contact_DAO_Relationship) {
-    $matcherTypes = CRM_Geostelsel_LocalMatcher::getMatchRelationshipTypeIds();
-    $matcherTypeRegioRelationship = CRM_Geostelsel_LocalMatcher::getLocalRegioRelationshipTypeId();
-    if (in_array($objectRef->relationship_type_id, $matcherTypes)) {
-      //de relatie is een lid van op basis van gemeente e.d.
-      //gebruik contact_id_a van deze relatie als een source contact
-      $matcher = $factory->getMatcherForEntity('local_regio', array('relationship' => $objectRef));
-      $matcher->matchAndCreateForSourceContact();
-    } elseif ($objectRef->relationship_type_id == $matcherTypeRegioRelationship) {
-      //de relatie is een relatie van type lokaal/regio
-      //gebruik contact_id_b van de relatie als de target contact id
-      $interface = $factory->getInterfaceForEntity('local_regio');
-      $matcher = $interface->getMatcher();
-      
-      //find the entityID of a rule on the target (if not found do not do any matching)
-      //if configured correctly there is only one rule
-      $rules = $interface->listEntitiesForTarget($objectRef->contact_id_b);
-      foreach($rules as $rule) {  
-        $matcher->matchAndCreateForTargetContactAndEntityId($objectRef->contact_id_b, $rule['entity_id']);
-      }
-    }
-  }
+}
+
+/**
+ * Check if contact is a member of a local party or the local party it self
+ * 
+ * Implementation of hook_civicrm_aclWhereClause
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_aclWhereClause
+ */
+function geostelsel_civicrm_aclWhereClause( $type, &$tables, &$whereTables, &$contactID, &$where ) {
+  $relationtypes = CRM_Geostelsel_RelationshipTypes::singleton();
+  $kaderleden = $relationtypes->getKaderfunctieRelationshipTypeIds();
+  $regios = $relationtypes->getRegioRelationshipTypeIds();
+  $lokale_leden = $relationtypes->getLokaalLidRelationshipTypeIds();
+  
+  $tables['civicrm_relationship_r1'] = $whereTables['civicrm_relationship_r1'] = 
+      " LEFT JOIN `civicrm_relationship` `geo_r1` ON  `contact_a`.`id` = `geo_r1`.`contact_id_a` AND `geo_r1`.`relationship_type_id` IN (".implode(",", $regios).")";
+  $tables['civicrm_relationship_r2'] = $whereTables['civicrm_relationship_r2'] = 
+      " LEFT JOIN `civicrm_relationship` `geo_r2` ON  `geo_r2`.`contact_id_b` = `geo_r1`.`contact_id_b` AND `geo_r2`.`relationship_type_id` IN (".implode(",", $kaderleden).")";
+  $tables['civicrm_relationship_r3'] = $whereTables['civicrm_relationship_r3'] = 
+      " LEFT JOIN `civicrm_relationship` `geo_r3` ON  `contact_a`.`id` = `geo_r3`.`contact_id_a` AND `geo_r3`.`relationship_type_id` IN (".implode(",", $lokale_leden).")";
+  $tables['civicrm_relationship_r4'] = $whereTables['civicrm_relationship_r4'] = 
+      " LEFT JOIN `civicrm_relationship` `geo_r4` ON  `geo_r4`.`contact_id_a` = `geo_r3`.`contact_id_b` AND `geo_r4`.`relationship_type_id` IN (".implode(",", $regios).")";
+  $tables['civicrm_relationship_r5'] = $whereTables['civicrm_relationship_r5'] = 
+      " LEFT JOIN `civicrm_relationship` `geo_r5` ON  `geo_r5`.`contact_id_b` = `geo_r4`.`contact_id_b` AND `geo_r5`.`relationship_type_id` IN (".implode(",", $kaderleden).")";
+  
+  $where .= " (`geo_r2`.`contact_id_a` = '".$contactID."' OR `geo_r5`.`contact_id_a` = '".$contactID."')";
+  return true;
 }

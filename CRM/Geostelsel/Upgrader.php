@@ -35,7 +35,7 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
       'is_reserved' => '1',
       'description' => 'Automatische relatie op basis van gemeente',
     ));
-    $this->addRelationshipType('local_based', 'Lid van lokaal', 'local_based', 'Bevat lokaal-lid', array(
+    $this->addRelationshipType('kaderfunctie_ab', 'Heeft kaderfunctie', 'kaderfunctie_ba', 'Bevat kaderleden', array(
       'is_reserved' => '1',
       'description' => 'Automatische relatie op basis van lokaal lidmaatschap',
     ));
