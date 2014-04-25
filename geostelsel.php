@@ -188,23 +188,25 @@ function geostelsel_civicrm_aclWhereClause( $type, &$tables, &$whereTables, &$co
   $regios = $relationtypes->getRegioRelationshipTypeIds();
   $lokale_leden = $relationtypes->getLokaalLidRelationshipTypeIds();
   
+  $activeCondition = " AND `%1\$s`.`is_active` AND (`%1\$s`.`start_date` <= CURDATE() OR `%1\$s`.`start_date` IS NULL) AND (`%1\$s`.`end_date` >= CURDATE() OR `%1\$s`.`end_date` IS NULL)";
+  
   //Voorzitter van regio wil contact kaart van lokale afdeling bekijken
   $tables['civicrm_relationship_r1'] = $whereTables['civicrm_relationship_r1'] = 
-      " LEFT JOIN `civicrm_relationship` `geo_r1` ON  `contact_a`.`id` = `geo_r1`.`contact_id_a` AND `geo_r1`.`relationship_type_id` IN (".implode(",", $regios).")";
+      " LEFT JOIN `civicrm_relationship` `geo_r1` ON  `contact_a`.`id` = `geo_r1`.`contact_id_a` AND `geo_r1`.`relationship_type_id` IN (".implode(",", $regios).")".sprintf($activeCondition, 'geo_r1');
   $tables['civicrm_relationship_r2'] = $whereTables['civicrm_relationship_r2'] = 
-      " LEFT JOIN `civicrm_relationship` `geo_r2` ON  `geo_r2`.`contact_id_b` = `geo_r1`.`contact_id_b` AND `geo_r2`.`relationship_type_id` IN (".implode(",", $kaderleden).")";
+      " LEFT JOIN `civicrm_relationship` `geo_r2` ON  `geo_r2`.`contact_id_b` = `geo_r1`.`contact_id_b` AND `geo_r2`.`relationship_type_id` IN (".implode(",", $kaderleden).")".sprintf($activeCondition, 'geo_r2');
   
   //voorzitter van regio wil contact kaart van lid van lokale afdeling bekijken
   $tables['civicrm_relationship_r3'] = $whereTables['civicrm_relationship_r3'] = 
       " LEFT JOIN `civicrm_relationship` `geo_r3` ON  `contact_a`.`id` = `geo_r3`.`contact_id_a` AND `geo_r3`.`relationship_type_id` IN (".implode(",", $lokale_leden).")";
   $tables['civicrm_relationship_r4'] = $whereTables['civicrm_relationship_r4'] = 
-      " LEFT JOIN `civicrm_relationship` `geo_r4` ON  `geo_r4`.`contact_id_a` = `geo_r3`.`contact_id_b` AND `geo_r4`.`relationship_type_id` IN (".implode(",", $regios).")";
+      " LEFT JOIN `civicrm_relationship` `geo_r4` ON  `geo_r4`.`contact_id_a` = `geo_r3`.`contact_id_b` AND `geo_r4`.`relationship_type_id` IN (".implode(",", $regios).")".sprintf($activeCondition, 'geo_r4');
   $tables['civicrm_relationship_r5'] = $whereTables['civicrm_relationship_r5'] = 
-      " LEFT JOIN `civicrm_relationship` `geo_r5` ON  `geo_r5`.`contact_id_b` = `geo_r4`.`contact_id_b` AND `geo_r5`.`relationship_type_id` IN (".implode(",", $kaderleden).")";
+      " LEFT JOIN `civicrm_relationship` `geo_r5` ON  `geo_r5`.`contact_id_b` = `geo_r4`.`contact_id_b` AND `geo_r5`.`relationship_type_id` IN (".implode(",", $kaderleden).")".sprintf($activeCondition, 'geo_r5');
   
   //voorzitter van lokale afdeling wil contact kaart van lid van lokale afdeling bekijken
   $tables['civicrm_relationship_r6'] = $whereTables['civicrm_relationship_r6'] = 
-      " LEFT JOIN `civicrm_relationship` `geo_r6` ON  `geo_r6`.`contact_id_b` = `geo_r3`.`contact_id_b` AND `geo_r6`.`relationship_type_id` IN (".implode(",", $kaderleden).")";
+      " LEFT JOIN `civicrm_relationship` `geo_r6` ON  `geo_r6`.`contact_id_b` = `geo_r3`.`contact_id_b` AND `geo_r6`.`relationship_type_id` IN (".implode(",", $kaderleden).")".sprintf($activeCondition, 'geo_r6');
   
   //voorzitter van lokale afdeling wil contact kaart van lokaal inzien
   //of voorzietter van regio wil contact kaart van regio inzien
