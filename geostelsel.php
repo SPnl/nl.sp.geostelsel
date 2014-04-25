@@ -198,7 +198,7 @@ function geostelsel_civicrm_aclWhereClause( $type, &$tables, &$whereTables, &$co
   
   //voorzitter van regio wil contact kaart van lid van lokale afdeling bekijken
   $tables['civicrm_relationship_r3'] = $whereTables['civicrm_relationship_r3'] = 
-      " LEFT JOIN `civicrm_relationship` `geo_r3` ON  `contact_a`.`id` = `geo_r3`.`contact_id_a` AND `geo_r3`.`relationship_type_id` IN (".implode(",", $lokale_leden).")";
+      " LEFT JOIN `civicrm_relationship` `geo_r3` ON  `contact_a`.`id` = `geo_r3`.`contact_id_a` AND `geo_r3`.`relationship_type_id` IN (".implode(",", $lokale_leden).")".sprintf($activeCondition, 'geo_r3');
   $tables['civicrm_relationship_r4'] = $whereTables['civicrm_relationship_r4'] = 
       " LEFT JOIN `civicrm_relationship` `geo_r4` ON  `geo_r4`.`contact_id_a` = `geo_r3`.`contact_id_b` AND `geo_r4`.`relationship_type_id` IN (".implode(",", $regios).")".sprintf($activeCondition, 'geo_r4');
   $tables['civicrm_relationship_r5'] = $whereTables['civicrm_relationship_r5'] = 
@@ -211,7 +211,7 @@ function geostelsel_civicrm_aclWhereClause( $type, &$tables, &$whereTables, &$co
   //voorzitter van lokale afdeling wil contact kaart van lokaal inzien
   //of voorzietter van regio wil contact kaart van regio inzien
   $tables['civicrm_relationship_r7'] = $whereTables['civicrm_relationship_r7'] = 
-      " LEFT JOIN `civicrm_relationship` `geo_r7` ON  `contact_a`.`id` = `geo_r7`.`contact_id_b` AND `geo_r7`.`relationship_type_id` IN (".implode(",", $kaderleden).")";
+      " LEFT JOIN `civicrm_relationship` `geo_r7` ON  `contact_a`.`id` = `geo_r7`.`contact_id_b` AND `geo_r7`.`relationship_type_id` IN (".implode(",", $kaderleden).")".sprintf($activeCondition, 'geo_r7');
   
   $where .= " (`geo_r2`.`contact_id_a` = '".$contactID."' OR `geo_r5`.`contact_id_a` = '".$contactID."' OR `geo_r6`.`contact_id_a` = '".$contactID."' OR `geo_r7`.`contact_id_a` = '".$contactID."')";
   return true;
