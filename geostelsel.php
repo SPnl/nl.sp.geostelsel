@@ -143,6 +143,28 @@ function geostelsel_autorelationship_targetinterfaces(&$interfaces) {
 }
 
 /**
+ * Implementation of hook_autorelationship_retrieve_available_interfaces
+ * 
+ * @param array $interfaces System names of the interfaces available for this contact
+ */
+function geostelsel_autorelationship_retrieve_available_interfaces($contactID) {
+  /**
+   * Automatic relationship comes with an example and that is matching on base of the city
+   * This example is disabled by default
+   */
+  
+  $return = array();
+  $return['gemeente'] = false; 
+  //check contact type
+  $contact_type = CRM_Contact_BAO_Contact::getContactType($contactID);
+  if ($contact_type == 'Organization') {
+    $return['gemeente'] = true; 
+  }
+  
+  return $return;
+}
+
+/**
  * Implementation of hook_civicrm_post
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
  */
