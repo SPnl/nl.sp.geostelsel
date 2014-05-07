@@ -49,7 +49,7 @@ class CRM_Geostelsel_GemeenteMatcher extends CRM_Autorelationship_Matcher {
   }
   
   public function getRelationshipTypeNameAB() {
-    return 'gemeente_based';
+    return 'gemeente_based_ab';
   }
   
   public function setData($data) {

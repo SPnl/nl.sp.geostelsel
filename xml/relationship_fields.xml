@@ -7,7 +7,7 @@
       <title>Gemeente relationship</title>
       <extends>Relationship</extends>
       <extends_entity_column_value_option_group>relationship_type</extends_entity_column_value_option_group>
-      <extends_entity_column_value>gemeente_based</extends_entity_column_value>
+      <extends_entity_column_value>gemeente_based_ab</extends_entity_column_value>
       <style>Inline</style>
       <collapse_display>1</collapse_display>
       <help_pre></help_pre>

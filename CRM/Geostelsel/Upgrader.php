@@ -30,8 +30,13 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
     return true;
   }
   
+  public function upgrade_1003() {
+    $this->executeSql("UPDATE `civicrm_relationship_type` SET `name_a_b` = 'gemeente_based_ab', `name_b_a` = 'gemeente_based_ba' WHERE `name_a_b` = 'gemeente_based' AND `name_b_a` = 'gemeente_based' ");
+    return true;
+  }
+  
   protected function addRelationships() {
-    $this->addRelationshipType('gemeente_based', 'Op basis van gemeente (A-B)', 'gemeente_based', 'Op basis van gemeente (B-A)', array(
+    $this->addRelationshipType('gemeente_based_ab', 'Op basis van gemeente (A-B)', 'gemeente_based_ba', 'Op basis van gemeente (B-A)', array(
       'is_reserved' => '1',
       'description' => 'Automatische relatie op basis van gemeente',
     ));
