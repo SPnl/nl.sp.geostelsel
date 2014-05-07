@@ -19,7 +19,7 @@ class CRM_Geostelsel_RelationshipTypes {
   protected function __construct() {
     $this->getRelationshipTypeIdByNameAB('kaderfunctie_ab', $this->kaderfuncties_rel_type_ids);
     $this->getRelationshipTypeIdByNameAB('local_regio', $this->regio_rel_type_ids);
-    $this->getRelationshipTypeIdByNameAB('gemeente_based', $this->lokaal_lid_rel_type_ids);
+    $this->getRelationshipTypeIdByNameAB('gemeente_based_ab', $this->lokaal_lid_rel_type_ids);
   }
   
   /**
