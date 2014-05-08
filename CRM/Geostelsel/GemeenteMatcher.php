@@ -108,7 +108,7 @@ class CRM_Geostelsel_GemeenteMatcher extends CRM_Autorelationship_Matcher {
       $target['contact_id'] = $dao->contact_id;
       $target['entity_id'] = $dao->id;
       $target['entity'] = $this->interface->getEntitySystemName();
-      
+
       $return[] = $target;
     }
     

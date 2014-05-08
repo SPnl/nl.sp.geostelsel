@@ -171,8 +171,14 @@ function geostelsel_autorelationship_retrieve_available_interfaces($contactID) {
 function geostelsel_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
   $factory = CRM_Autorelationship_TargetFactory::singleton();
   if ($objectName == 'Address' && $objectRef instanceof CRM_Core_DAO_Address) {  
-    $matcher = $factory->getMatcherForEntity('gemeente', array('address' => $objectRef));
-    $matcher->matchAndCreateForSourceContact();
+    $objAddress = new CRM_Core_BAO_Address();
+    $objAddress->id = $objectId;
+    if ($objAddress->find(true)) {
+      $matcher = $factory->getMatcherForEntity('gemeente', array('address' => $objAddress));
+      $matcher->matchAndCreateForSourceContact();
+    } else {
+      //@todo end existing relations because this address doesn't exist in the database anymore
+    }
   }
 }
 
