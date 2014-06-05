@@ -35,6 +35,11 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
     return true;
   }
   
+  public function upgrade_1004() {
+    $this->removeRelationshipType('local_regio', 'regio_local');
+    return true;
+  }
+  
   protected function addRelationships() {
     $this->addRelationshipType('gemeente_based_ab', 'Op basis van gemeente (A-B)', 'gemeente_based_ba', 'Op basis van gemeente (B-A)', array(
       'is_reserved' => '1',
@@ -49,13 +54,20 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
       'description' => 'Relatie voor lokale afdeling-regio',
     ));
   }
+  
+  public function removeRelationships() {
+    $this->removeRelationshipType('kaderfunctie_ab', 'gemeente_based_ba');
+    $this->removeRelationshipType('gemeente_based_ab', 'regio_local');
+  }
 
   /**
    * Example: Run an external SQL script when the module is uninstalled
    */
-  /*public function uninstall() {
-   $this->executeSqlFile('sql/myuninstall.sql');
-  }*/
+  public function uninstall() {
+    $this->removeRelationships();
+    $this->executeSqlFile('sql/myuninstall.sql');
+    return true;
+  }
   
   /**
    * Add an relationship type to CiviCRM
@@ -91,6 +103,16 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
         $ids['relationshipType'] = CRM_Utils_Array::value('id', $params);
       }
       $relationType = CRM_Contact_BAO_RelationshipType::add($params, $ids);
+  }
+  
+  public function removeRelationshipType($name_a_b, $name_b_a) {
+    $checkParams['name_a_b'] = $name_a_b;
+    $checkParams['name_b_a'] = $name_b_a;
+    $checkResult = civicrm_api3('RelationshipType', 'get', $checkParams);
+    if (isset($checkResult['id']) && $checkResult['id']) {
+      $params['id'] = $checkResult['id'];
+      civicrm_api3('RelationshipType', 'Delete', $params);
+    }
   }
 
   /**
