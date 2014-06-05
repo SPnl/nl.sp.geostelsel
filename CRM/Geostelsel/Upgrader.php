@@ -65,7 +65,7 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
    */
   public function uninstall() {
     $this->removeRelationships();
-    $this->executeSqlFile('sql/myuninstall.sql');
+    $this->executeSqlFile('sql/uninstall.sql');
     return true;
   }
   
