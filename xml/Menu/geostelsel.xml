@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<menu>
-  <item>
-    <path>civicrm/autorelationship/addrule/gemeente</path>
-    <page_callback>CRM_Geostelsel_Form_AddGemeenteTargetRule</page_callback>
-    <title>Add gemeente for automatic relationship</title>
-    <access_arguments>access CiviCRM</access_arguments>
-  </item>
-</menu>

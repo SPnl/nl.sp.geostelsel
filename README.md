@@ -1,6 +1,7 @@
 nl.sp.geostelsel
 ================
 
-This extension requires the org.civicoop.postcodenl and the org.civicoop.autorelationship
+This extension requires the org.civicoop.postcodenl extension
 
-This extension makes a matcher for automatic relationships based on the 'gemeente'.
+This extension implements feature for matching contacts to SP local branches, regions and provinces. 
+It also includes the permission system to access contacts a person is allowed to be.

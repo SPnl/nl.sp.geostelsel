@@ -12,107 +12,14 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
    * Example: Run an external SQL script when the module is installed
    */
   public function install() {
-    $this->executeSqlFile('sql/geostelsel_install.sql');
-    
-    $this->addRelationships();    
-    
-    $this->executeCustomDataFile('xml/relationship_fields.xml');
-  }
-  
-  public function upgrade_1001() {
-    $this->addRelationships();
-    $this->executeSqlFile('sql/upgrade_1001.sql');
     return true;
-  }
-  
-  public function upgrade_1002() {
-    $this->executeCustomDataFile('xml/upgrade_1002.xml');
-    return true;
-  }
-  
-  public function upgrade_1003() {
-    $this->executeSql("UPDATE `civicrm_relationship_type` SET `name_a_b` = 'gemeente_based_ab', `name_b_a` = 'gemeente_based_ba' WHERE `name_a_b` = 'gemeente_based' AND `name_b_a` = 'gemeente_based' ");
-    return true;
-  }
-  
-  public function upgrade_1004() {
-    $this->removeRelationshipType('local_regio', 'regio_local');
-    return true;
-  }
-  
-  protected function addRelationships() {
-    $this->addRelationshipType('gemeente_based_ab', 'Op basis van gemeente (A-B)', 'gemeente_based_ba', 'Op basis van gemeente (B-A)', array(
-      'is_reserved' => '1',
-      'description' => 'Automatische relatie op basis van gemeente',
-    ));
-    $this->addRelationshipType('kaderfunctie_ab', 'Heeft kaderfunctie', 'kaderfunctie_ba', 'Bevat kaderleden', array(
-      'is_reserved' => '1',
-      'description' => 'Automatische relatie op basis van lokaal lidmaatschap',
-    ));
-    $this->addRelationshipType('local_regio', 'Onder regio', 'regio_local', 'Bevat lokale afdeling', array(
-      'is_reserved' => '1',
-      'description' => 'Relatie voor lokale afdeling-regio',
-    ));
-  }
-  
-  public function removeRelationships() {
-    $this->removeRelationshipType('kaderfunctie_ab', 'gemeente_based_ba');
-    $this->removeRelationshipType('gemeente_based_ab', 'regio_local');
   }
 
   /**
    * Example: Run an external SQL script when the module is uninstalled
    */
   public function uninstall() {
-    $this->removeRelationships();
-    $this->executeSqlFile('sql/uninstall.sql');
     return true;
-  }
-  
-  /**
-   * Add an relationship type to CiviCRM
-   * 
-   * @param String $name_a_b
-   * @param String $label_a_b
-   * @param String $name_b_a
-   * @param String $label_b_a
-   * @param (optional) array $params additional parameters for the activity type (e.g. 'reserved' => 1)
-   * @return type
-   */
-  protected function addRelationshipType($name_a_b, $label_a_b, $name_b_a, $label_b_a, $params = array()) {
-    //try {      
-      $checkParams['name_a_b'] = $name_a_b;
-      $checkParams['name_b_a'] = $name_b_a;
-      $checkResult = civicrm_api3('RelationshipType', 'get', $checkParams);
-      if (isset($checkResult['id']) && $checkResult['id']) {
-        //activity type exists, update this one
-        $params['id'] = $checkResult['id'];
-      } else {
-         //if ID is set then unset the id parameter so that we create a new one
-        if (isset($params['id'])) {
-          unset($params['id']);
-        }
-      }
-      $params['name_a_b'] = $name_a_b;
-      $params['name_b_a'] = $name_b_a;
-      $params['label_a_b'] = $label_a_b;
-			$params['label_b_a'] = $label_b_a;
-      
-      $ids = array();
-      if (isset($params['id'])) {
-        $ids['relationshipType'] = CRM_Utils_Array::value('id', $params);
-      }
-      $relationType = CRM_Contact_BAO_RelationshipType::add($params, $ids);
-  }
-  
-  public function removeRelationshipType($name_a_b, $name_b_a) {
-    $checkParams['name_a_b'] = $name_a_b;
-    $checkParams['name_b_a'] = $name_b_a;
-    $checkResult = civicrm_api3('RelationshipType', 'get', $checkParams);
-    if (isset($checkResult['id']) && $checkResult['id']) {
-      $params['id'] = $checkResult['id'];
-      civicrm_api3('RelationshipType', 'Delete', $params);
-    }
   }
 
   /**
