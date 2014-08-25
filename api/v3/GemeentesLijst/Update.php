@@ -27,13 +27,14 @@ function civicrm_api3_gemeentes_lijst_update($params) {
   
   //first add new gemeentes to the list
   $count = 0;
-  $sql = "SELECT DISTINCT `civicrm_postcodenl`.`gemeente`, `civicrm_postcodenl`.`provincie` FROM `civicrm_postcodenl` LEFT JOIN `civicrm_option_value` ON `civicrm_option_value`.`option_group_id` = %1 AND `civicrm_option_value`.`value` = `civicrm_postcodenl`.`gemeente` WHERE `civicrm_option_value`.`id` IS NULL";
+  $sql = "SELECT DISTINCT `civicrm_postcodenl`.`gemeente`, `civicrm_postcodenl`.`provincie` FROM `civicrm_postcodenl` LEFT JOIN `civicrm_option_value` ON `civicrm_option_value`.`option_group_id` = %1 AND `civicrm_option_value`.`value` COLLATE utf8_general_ci = `civicrm_postcodenl`.`gemeente` COLLATE utf8_general_ci WHERE `civicrm_option_value`.`id` IS NULL";
   $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($option_group_id, 'Integer')));
   while($dao->fetch()) {
     $insert = "INSERT INTO `civicrm_option_value` (`option_group_id`, `value`, `label`, `grouping`, `is_reserved`, `is_active`) VALUES (%1, %2, %3, %4, 1, 1);";
     $value = $dao->provincie.'_'.$dao->gemeente;
     $label = $dao->gemeente .' ('.$dao->provincie.')';
-    $grouping = $dao->provincies;
+    $grouping = $dao->provincie;
+    
     CRM_Core_DAO::executeQuery($insert, array(
       1 => array($option_group_id, 'Integer'),
       2 => array($value, 'String'),
