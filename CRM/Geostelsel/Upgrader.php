@@ -12,6 +12,9 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
    * Example: Run an external SQL script when the module is installed
    */
   public function install() {
+    $this->executeCustomDataFile('xml/geostelsel.xml');
+    $this->executeCustomDataFile('xml/toegang.xml');
+    $this->executeCustomDataFile('xml/gemeente.xml');
     return true;
   }
 
