@@ -31,7 +31,7 @@ function civicrm_api3_gemeentes_lijst_update($params) {
   $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($option_group_id, 'Integer')));
   while($dao->fetch()) {
     $insert = "INSERT INTO `civicrm_option_value` (`option_group_id`, `value`, `label`, `grouping`, `is_reserved`, `is_active`) VALUES (%1, %2, %3, %4, 1, 1);";
-    $value = $dao->provincie.'_'.$dao->gemeente;
+    $value = $dao->gemeente;
     $label = $dao->gemeente .' ('.$dao->provincie.')';
     $grouping = $dao->provincie;
     
