@@ -2,6 +2,45 @@
 
 require_once 'geostelsel.civix.php';
 
+/** 
+ * Update all contacts who have this gemeente in their primary address
+ * 
+ * Implementation of hook_civicrm_custom
+ * 
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_custom
+ */
+function geostelsel_civicrm_custom($op,$groupID, $entityID, &$params ) {
+  $repo = CRM_Geostelsel_GeoInfo_Repository::singleton();
+  $config = CRM_Geostelsel_Config::singleton();
+  if ($groupID == $config->getGemeenteCustomGroup('id')) {
+    //afdeling has changed the list of gemeentes, make sure all contacts are updated
+    _geostelsel_force_to_run_update_cron();
+  } elseif ($groupID == $config->getPostcodeCustomGroup('id')) {
+    //gemeente field of an address has been changed
+    foreach($params as $field) {
+      if ($field['custom_field_id'] == $config->getPostcodeGemeenteCustomField('id')) {
+        $sql = "SELECT `contact_id` FROM `civicrm_address` WHERE `is_primary` = '1' AND `id` = %1";
+        $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($field['entity_id'], 'Integer')));
+        if ($dao->fetch()) {
+          $repo->updateContact($dao->contact_id, $field['value']);
+        }
+      }
+    }
+  } elseif ($groupID == $config->getGeostelselCustomGroup('id')) {
+    foreach($params as $field) {
+      if ($field['custom_field_id'] == $config->getHandmatigeInvoerField('id') && empty($field['value'])) {
+        $postcode_table = $config->getPostcodeCustomGroup('table_name');
+        $gemeente_field = $config->getPostcodeGemeenteCustomField('column_name');
+        $sql = "SELECT `{$postcode_table}`.`{$gemeente_field}` AS `gemeente` FROM `civicrm_address` INNER JOIN `{$postcode_table}` ON `civicrm_address`.`id` = `{$postcode_table}`.`entity_id` WHERE `civicrm_address`.`is_primary` = 1 AND `civicrm_address`.`contact_id` = %1";
+        $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($field['entity_id'], 'Integer')));
+        if ($dao->fetch()) {
+          $repo->updateContact($field['entity_id'], $dao->gemeente);
+        }
+      }
+    }
+  }  
+}
+
 /**
  * Implementation of hook_civicrm_validateForm
  * 
@@ -17,6 +56,9 @@ function geostelsel_civicrm_validateForm( $formName, &$fields, &$files, &$form, 
     foreach($fields as $key => $value) {
       if (stripos($key, $custom_id) === 0 && strripos($key, '_id') !== false) {
         $data = $repo->getGeoInfoByGemeente($value);
+        if ($data === false) {
+          continue;
+        }
         if ($data->getAfdelingsContactId() > 0 && $data->getAfdelingsContactId() != $form->_entityId) {
           $afdelings_naam = "";
           try {
@@ -29,8 +71,12 @@ function geostelsel_civicrm_validateForm( $formName, &$fields, &$files, &$form, 
         }
       }
     }
-  }
-  
+  }  
+}
+
+
+function _geostelsel_force_to_run_update_cron() {
+  CRM_Core_BAO_Setting::setItem('1', 'nl.sp.geostelsel', 'api.geostelsel.update.to_run');
 }
 
 /**
