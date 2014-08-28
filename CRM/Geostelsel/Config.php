@@ -25,11 +25,18 @@ class CRM_Geostelsel_Config {
   protected $postcode_custom_group; //custom field for postcode
   
   protected $postcode_gemeeente_field; //gemeente field on postcode custom set
+  
+  protected $permission_table; 
+  
+  protected $permission_field;
 
   protected function __construct() {
     //custom group from org.civicoop.postcodenl
     $this->postcode_custom_group = civicrm_api3('CustomGroup', 'getsingle', array('name' => 'Adresgegevens'));
     $this->postcode_gemeeente_field = civicrm_api3('CustomField', 'getsingle', array('name' => 'Gemeente', 'custom_group_id' => $this->postcode_custom_group['id']));
+    
+    $this->permission_table = civicrm_api3('CustomGroup', 'getsingle', array('name' => 'Toegangsgegevens'));
+    $this->permission_field = civicrm_api3('CustomField', 'getsingle', array('name' => 'Toegang_tot_contacten_van', 'custom_group_id' => $this->permission_table['id']));
     
     $this->geostelsel_custom_group = civicrm_api3('CustomGroup', 'getsingle', array('name' => 'Geostelsel'));
     $this->geostelsel_handmatige_invoer = civicrm_api3('CustomField', 'getsingle', array('name' => 'Handmatige_invoer', 'custom_group_id' => $this->geostelsel_custom_group['id']));
@@ -96,6 +103,14 @@ class CRM_Geostelsel_Config {
   
   public function getPostcodeGemeenteCustomField($key='id') {
     return $this->postcode_gemeeente_field[$key];
+  }
+  
+  public function getPermissionTable($key='id') {
+    return $this->permission_table[$key];
+  }
+  
+  public function getPermissionField($key='id') {
+    return $this->permission_field[$key];
   }
 
   protected function getRelationshipTypeIdByNameAB($name_a_b) {

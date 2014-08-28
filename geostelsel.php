@@ -41,6 +41,40 @@ function geostelsel_civicrm_custom($op,$groupID, $entityID, &$params ) {
   }  
 }
 
+function geostelsel_civicrm_aclWhereClause( $type, &$tables, &$whereTables, &$contactID, &$where ) {
+  if ( ! $contactID ) {
+    return;
+  }
+  
+  $config = CRM_Geostelsel_Config::singleton();
+  
+  $permissioned_to = array();  
+  $permission_table = $config->getPermissionTable('table_name');
+  $permission_field = $config->getPermissionField('column_name');
+  
+  $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `{$permission_table}` WHERE `entity_id` = %1", array(1 => array($contactID, 'Integer')));
+  while ($dao->fetch()) {
+    $permissioned_to[] = $dao->$permission_field;
+  }
+  
+  if (count($permissioned_to) == 0) {
+    return;
+  }
+  
+  $table = $config->getGeostelselCustomGroup('table_name');
+  $afdeling = $config->getAfdelingsField('column_name');
+  $regio = $config->getRegioField('column_name');
+  $provincie = $config->getProvincieField('column_name');
+  
+  $tables[$table] = $whereTables[$table] = "LEFT JOIN {$table} geostelsel ON contact_a.id = geostelsel.entity_id";
+  $ids = implode(", ", $permissioned_to);
+
+  if (!empty($where)) {
+    $where .= " AND";
+  }
+  $where .= " (geostelsel.`{$afdeling}` IN ({$ids}) OR geostelsel.`{$regio}` IN ({$ids}) OR geostelsel.`{$provincie}` IN ({$ids}))";
+}
+
 /**
  * Implementation of hook_civicrm_validateForm
  * 
