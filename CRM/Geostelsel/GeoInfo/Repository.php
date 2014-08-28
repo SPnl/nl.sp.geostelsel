@@ -6,15 +6,8 @@ class CRM_Geostelsel_GeoInfo_Repository {
   
   protected $_cache;
   
-  protected $afdelings_gemeente_group;
-  
-  protected $afdelings_gemeente_field;
-  
-
   protected function __construct() {
     $this->_cache = array();
-    $this->afdelings_gemeente_group = civcirm_api3('CustomGroup', 'getsingle', array('name' => 'Gemeentes'));
-    $this->afdelings_gemeente_field = civcirm_api3('CustomField', 'getsingle', array('name' => 'Gemeente', 'custom_group_id' => $this->afdelings_gemeente_group['id']));
   }
   
   /**
@@ -27,6 +20,11 @@ class CRM_Geostelsel_GeoInfo_Repository {
     return self::$_singleton;
   }
   
+  /**
+   * 
+   * @param type $gemeente
+   * @return CRM_Geostelsel_GeoInfo_Data
+   */
   public function getGeoInfoByGemeente($gemeente) {
     if (!isset($this->_cache[$gemeente])) {
       $afdelings_contact_id = $this->getAfdelingByGemeente($gemeente);
@@ -37,7 +35,10 @@ class CRM_Geostelsel_GeoInfo_Repository {
   }
   
   protected function getAfdelingByGemeente($gemeente) {
-    $sql = "SELECT * FROM `".$this->afdelings_gemeente_group['table_name']."` WHERE `".$this->afdelings_gemeente_field['column_name']."` = %1";
+    $config = CRM_Geostelsel_Config::singleton();
+    $table = $config->getGemeenteCustomGroup('table_name');
+    $field = $config->getGemeenteCustomField('column_name');
+    $sql = "SELECT * FROM `".$table."` WHERE `".$field."` = %1";
     $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($gemeente, 'String')));
     if ($dao->fetch()) {
       return $dao->entity_id;

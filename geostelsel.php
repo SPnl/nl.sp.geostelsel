@@ -3,6 +3,37 @@
 require_once 'geostelsel.civix.php';
 
 /**
+ * Implementation of hook_civicrm_validateForm
+ * 
+ * Validate that a gemeente is only added once to an afdeling
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_validateForm
+ */
+function geostelsel_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
+  if ($formName == 'CRM_Contact_Form_CustomData') {
+    $repo = CRM_Geostelsel_GeoInfo_Repository::singleton();
+    $config = CRM_Geostelsel_Config::singleton();
+    $custom_id = 'custom_'.$config->getGemeenteCustomField('id');
+    foreach($fields as $key => $value) {
+      if (stripos($key, $custom_id) === 0 && strripos($key, '_id') !== false) {
+        $data = $repo->getGeoInfoByGemeente($value);
+        if ($data->getAfdelingsContactId() > 0 && $data->getAfdelingsContactId() != $form->_entityId) {
+          $afdelings_naam = "";
+          try {
+            $afdelings_naam = civicrm_api3('Contact', 'getvalue', array('return' => 'display_name', 'id' => $data->getAfdelingsContactId()));
+          } catch (Exception $e) {
+            
+          }
+          $fieldKey = str_replace("_id", "", $key);
+          $errors[$fieldKey] = ts('Gemeente "'.$fields[$fieldKey].'" bestaat al bij "'.$afdelings_naam.'"');
+        }
+      }
+    }
+  }
+  
+}
+
+/**
  * Implementation of hook_civicrm_config
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config
