@@ -5,6 +5,28 @@ require_once 'geostelsel.civix.php';
 /** 
  * Update all contacts who have this gemeente in their primary address
  * 
+ * Implementation of hook_civicrm_civicrm_post
+ * 
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_civicrm_post
+ */
+function geostelsel_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
+  if ($objectName == 'Relationship') {
+    $config = CRM_Geostelsel_Config::singleton();
+    //if relationship is between afdeling and regio or between regio and provincie
+    //also make sure all contacts with automatic geostelsel will be updated
+    $rel_type_id = array(
+      $config->getRegioRelationshipTypeId(),
+      $config->getProvincieRelationshipTypeId(),
+    );
+    if (in_array($objectRef->relationship_type_id, $rel_type_id)) {
+      _geostelsel_force_to_run_update_cron();
+    }
+  }
+}
+
+/** 
+ * Update all contacts who have this gemeente in their primary address
+ * 
  * Implementation of hook_civicrm_custom
  * 
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_custom
