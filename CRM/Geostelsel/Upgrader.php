@@ -15,6 +15,7 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
     $this->executeCustomDataFile('xml/geostelsel.xml');
     $this->executeCustomDataFile('xml/toegang.xml');
     $this->executeCustomDataFile('xml/gemeente.xml');
+    $this->executeCustomDataFile('xml/groep.xml');
     return true;
   }
 
@@ -44,20 +45,14 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
    *
   public function disable() {
     CRM_Core_DAO::executeQuery('UPDATE foo SET is_active = 0 WHERE bar = "whiz"');
-  }
+  }*/
 
-  /**
-   * Example: Run a couple simple queries
-   *
-   * @return TRUE on success
-   * @throws Exception
-   *
-  public function upgrade_4200() {
-    $this->ctx->log->info('Applying update 4200');
-    CRM_Core_DAO::executeQuery('UPDATE foo SET bar = "whiz"');
-    CRM_Core_DAO::executeQuery('DELETE FROM bang WHERE willy = wonka(2)');
+  
+  public function upgrade_1001() {
+    $this->ctx->log->info('Applying update 1001');
+    $this->executeCustomDataFile('xml/groep.xml');
     return TRUE;
-  } // */
+  }
 
 
   /**

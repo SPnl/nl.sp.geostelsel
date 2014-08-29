@@ -2,6 +2,37 @@
 
 require_once 'geostelsel.civix.php';
 
+function geostelsel_civicrm_aclGroup( $type, $contactID, $tableName, &$allGroups, &$currentGroups ) {
+  if ($tableName != 'civicrm_saved_search') {
+    return;
+  }
+  $group_access = new CRM_Geostelsel_Groep_ParentGroup();
+  $parent_groups = $group_access->getParentGroupsByContact($contactID);
+  foreach($parent_groups as $gid) {
+    if (isset($allGroups[$gid])) {
+      $currentGroups[] = $gid;
+    }
+  }
+  
+}
+
+function geostelsel_civicrm_customFieldOptions($fieldID, &$options, $detailedFormat = false ) {
+  $config = CRM_Geostelsel_Groep_Config::singleton();
+  if ($fieldID == $config->getGroepCustomField('id')) {
+    $group_ids = CRM_Core_PseudoConstant::group();
+    $groups = CRM_Contact_BAO_Group::getGroupsHierarchy($group_ids, NULL, '&nbsp;&nbsp;', TRUE);
+    foreach($groups as $gid => $title) {
+      if ($detailedFormat) {
+        $options['group_id_'.$gid]['id'] = 'group_id_'.$gid;
+        $options['group_id_'.$gid]['value'] = $gid;
+        $options['group_id_'.$gid]['label'] = $title;
+      } else {
+        $options[$gid] = $title;
+      }
+    }
+  }
+}
+
 /** 
  * Update all contacts after a relationship between 
  * afdeling and regio or regio and province is changed
@@ -21,6 +52,23 @@ function geostelsel_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
     );
     if (in_array($objectRef->relationship_type_id, $rel_type_id)) {
       _geostelsel_force_to_run_update_cron();
+    }
+  }
+}
+
+function geostelsel_civicrm_pre( $op, $objectName, $id, &$params ) {
+  if ($objectName == 'Group') {
+    //if user has not permission to manage groups then add the parents of the access groups
+    if (!CRM_Core_Permission::check('CiviCRM: administer reserved groups')) {
+      if (isset($params['created_id'])) {
+        $contactID = $params['created_id'];
+      } else {
+        $session = CRM_Core_Session::singleton();
+        $contactID = $session->get('userID');
+      }
+      
+      $group_access = new CRM_Geostelsel_Groep_ParentGroup();
+      $params['parents'] = implode(",",$group_access->accessToGroups($contactID));
     }
   }
 }
