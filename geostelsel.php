@@ -3,7 +3,8 @@
 require_once 'geostelsel.civix.php';
 
 /** 
- * Update all contacts who have this gemeente in their primary address
+ * Update all contacts after a relationship between 
+ * afdeling and regio or regio and province is changed
  * 
  * Implementation of hook_civicrm_civicrm_post
  * 
