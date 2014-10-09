@@ -13,11 +13,14 @@ function civicrm_api3_geostelsel_update($api_params) {
   $returnValues = array();
   
   $limit = 1000;
+  if (!empty($api_params['limit'])) {
+    $limit = $api_params['limit'];
+  }
   
   $to_run = CRM_Core_BAO_Setting::getItem('nl.sp.geostelsel', 'api.geostelsel.update.to_run');
   if ($to_run === '0' && empty($api_params['force'])) {
     $returnValues['message'] = 'No need for update';  
-    return civicrm_api3_create_success($returnValues, $params, 'Geostelsel', 'update');
+    return civicrm_api3_create_success($returnValues, $api_params, 'Geostelsel', 'update');
   }
   
   $offset = CRM_Core_BAO_Setting::getItem('nl.sp.geostelsel', 'api.geostelsel.update.offset');
