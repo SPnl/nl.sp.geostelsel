@@ -92,7 +92,7 @@ function geostelsel_civicrm_custom($op,$groupID, $entityID, &$params ) {
       if ($field['custom_field_id'] == $config->getPostcodeGemeenteCustomField('id')) {
         $sql = "SELECT `contact_id` FROM `civicrm_address` WHERE `is_primary` = '1' AND `id` = %1";
         $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($field['entity_id'], 'Integer')));
-        if ($dao->fetch()) {
+        if ($dao->fetch() && $dao->contact_id) {
           $repo->updateContact($dao->contact_id, $field['value']);
         }
       }
