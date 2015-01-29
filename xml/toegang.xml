@@ -35,7 +35,7 @@
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
       <column_name>toegang_tot_contacten_van</column_name>
-      <filter>action=lookup&amp;group=4</filter>
+      <filter>action=lookup&amp;contact_type=Organization</filter>
       <custom_group_name>Toegangsgegevens</custom_group_name>
     </CustomField>
   </CustomFields>
