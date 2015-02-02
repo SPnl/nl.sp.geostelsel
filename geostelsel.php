@@ -160,6 +160,7 @@ function geostelsel_civicrm_validateForm( $formName, &$fields, &$files, &$form, 
     $custom_id = 'custom_'.$config->getGemeenteCustomField('id');
     foreach($fields as $key => $value) {
       if (stripos($key, $custom_id) === 0 && strripos($key, '_id') !== false) {
+
         $data = $repo->getGeoInfoByGemeente($value);
         if ($data === false) {
           continue;

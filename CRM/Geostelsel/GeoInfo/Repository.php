@@ -26,19 +26,20 @@ class CRM_Geostelsel_GeoInfo_Repository {
    * @return CRM_Geostelsel_GeoInfo_Data
    */
   public function getGeoInfoByGemeente($gemeente) {
-    if (!isset($this->_cache[$gemeente])) {
+    $key = $gemeente;
+    if (!isset($this->_cache[$key])) {
       $afdelings_contact_id = $this->getAfdelingByGemeente($gemeente);
       if ($afdelings_contact_id) { 
-        $this->_cache[$gemeente] = new CRM_Geostelsel_GeoInfo_Data($afdelings_contact_id);
+        $this->_cache[$key] = new CRM_Geostelsel_GeoInfo_Data($afdelings_contact_id);
       } else {
-        $this->_cache[$gemeente] = false;
+        $this->_cache[$key] = false;
       }
       
     }
-    return $this->_cache[$gemeente];
+    return $this->_cache[$key];
   }
   
-  public function updateContact($contact_id, $gemeente) {
+  public function updateContact($contact_id, $gemeente, $provincie) {
     $config = CRM_Geostelsel_Config::singleton();
   
     $table = $config->getGeostelselCustomGroup('table_name');
@@ -56,8 +57,9 @@ class CRM_Geostelsel_GeoInfo_Repository {
         $existing = $dao->id;
       }
     }
-    
-    $data = $this->getGeoInfoByGemeente($gemeente);
+
+    $key = $gemeente.' ('.$provincie.')';
+    $data = $this->getGeoInfoByGemeente($key);
     if ($data === false) {
       $data = new CRM_Geostelsel_GeoInfo_Data(0);
     }

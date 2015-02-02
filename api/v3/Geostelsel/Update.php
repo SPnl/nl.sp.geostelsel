@@ -34,10 +34,18 @@ function civicrm_api3_geostelsel_update($api_params) {
   $gemeente_field = $config->getPostcodeGemeenteCustomField('column_name');
   
   $count = 0;
-  $dao =CRM_Core_DAO::executeQuery("SELECT `{$postcode_table}`.`{$gemeente_field}` AS `gemeente`, `civicrm_address`.`contact_id` AS `contact_id` FROM `{$postcode_table}` INNER JOIN `civicrm_address` ON `{$postcode_table}`.`entity_id` = `civicrm_address`.`id` LEFT JOIN `civicrm_contact` ON `civicrm_address`.`contact_id` = `civicrm_contact`.`id` WHERE `civicrm_address`.`is_primary` = '1' AND `civicrm_contact`.`is_deleted` = '0' LIMIT {$offset}, {$limit}");
+  $dao =CRM_Core_DAO::executeQuery("SELECT `{$postcode_table}`.`{$gemeente_field}` AS `gemeente`,
+                                            `civicrm_address`.`postal_code` AS `postal_code`,
+                                            `civicrm_address`.`contact_id` AS `contact_id`
+                                    FROM `{$postcode_table}`
+                                    INNER JOIN `civicrm_address` ON `{$postcode_table}`.`entity_id` = `civicrm_address`.`id`
+                                    LEFT JOIN `civicrm_contact` ON `civicrm_address`.`contact_id` = `civicrm_contact`.`id`
+                                    WHERE `civicrm_address`.`is_primary` = '1' AND `civicrm_contact`.`is_deleted` = '0' LIMIT {$offset}, {$limit}");
   while($dao->fetch()) {
+    $postcode = str_replace(" ", "", $dao->postal_code);
+    $provincie = CRM_Core_DAO::singleValueQuery("SELECT provincie from civicrm_postcodenl where postcode_nr = '".substr($postcode, 0, 4)."' and postcode_letter = '".substr($postcode, 4, 2)."' limit 0,1");
     $count ++;
-    $repo->updateContact($dao->contact_id, $dao->gemeente);
+    $repo->updateContact($dao->contact_id, $dao->gemeente, $provincie);
   }
   
   if ($count < $limit) {

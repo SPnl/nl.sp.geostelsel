@@ -27,22 +27,27 @@ function civicrm_api3_gemeentes_lijst_update($params) {
   
   //first add new gemeentes to the list
   $count = 0;
-  $sql = "SELECT DISTINCT `civicrm_postcodenl`.`gemeente`, `civicrm_postcodenl`.`provincie` FROM `civicrm_postcodenl` LEFT JOIN `civicrm_option_value` ON `civicrm_option_value`.`option_group_id` = %1 AND `civicrm_option_value`.`value` COLLATE utf8_general_ci = `civicrm_postcodenl`.`gemeente` COLLATE utf8_general_ci WHERE `civicrm_option_value`.`id` IS NULL";
-  $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($option_group_id, 'Integer')));
-  while($dao->fetch()) {
-    $insert = "INSERT INTO `civicrm_option_value` (`option_group_id`, `value`, `label`, `grouping`, `is_reserved`, `is_active`) VALUES (%1, %2, %3, %4, 1, 1);";
-    $value = $dao->gemeente;
-    $label = $dao->gemeente .' ('.$dao->provincie.')';
-    $grouping = $dao->provincie;
-    
-    CRM_Core_DAO::executeQuery($insert, array(
-      1 => array($option_group_id, 'Integer'),
-      2 => array($value, 'String'),
-      3 => array($label, 'String'),
-      4 => array($grouping, 'String'),
-    ));
-    
-    $count ++;
+  $gemeentes = CRM_Core_DAO::executeQuery("SELECT DISTINCT `civicrm_postcodenl`.`gemeente`, `civicrm_postcodenl`.`provincie` FROM `civicrm_postcodenl`");
+  while ($gemeentes->fetch()) {
+    $key = $gemeentes->gemeente.' ('.$gemeentes->provincie.')';
+    $sql = "SELECT COUNT(*) FROM `civicrm_option_value` where `option_group_id` = %1 AND `value` = %2";
+    $params = array();
+    $params[1] = array($option_group_id, 'Integer');
+    $params[2] = array($key, 'string');
+    $exist = CRM_Core_DAO::singleValueQuery($sql, $params);
+    if (!$exist) {
+      $insert = "INSERT INTO `civicrm_option_value` (`option_group_id`, `value`, `label`, `grouping`, `is_reserved`, `is_active`) VALUES (%1, %2, %3, %4, 1, 1);";
+      $grouping = $gemeentes->provincie;
+
+      CRM_Core_DAO::executeQuery($insert, array(
+        1 => array($option_group_id, 'Integer'),
+        2 => array($key, 'String'),
+        3 => array($key, 'String'),
+        4 => array($grouping, 'String'),
+      ));
+
+      $count ++;
+    }
   }
 
   $returnValues['message'] = 'Inserted '.$count.' gemeentes';

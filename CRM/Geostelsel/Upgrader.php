@@ -19,6 +19,31 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
     return true;
   }
 
+  public function upgrade_1002() {
+    //get all custom fields which are linked to the gemeente lijst
+    //and update the value so it includes the province name (same as label)
+    $custom_fields = CRM_Core_DAO::executeQuery("SELECT `civicrm_custom_field`.*, `civicrm_custom_group`.`table_name` FROM `civicrm_custom_field` INNER JOIN `civicrm_custom_group` ON `civicrm_custom_field`.`custom_group_id` = `civicrm_custom_group`.`id` INNER JOIN `civicrm_option_group` ON `civicrm_custom_field`.`option_group_id` = `civicrm_option_group`.`id` WHERE `civicrm_option_group`.`name` = 'gemeente'");
+    while($custom_fields->fetch()) {
+      $sql = "UPDATE `".$custom_fields->table_name."` `e`
+              INNER JOIN `civicrm_option_value` `ov`
+              ON `ov`.`option_group_id` = %1
+              AND `ov`.`value` = `e`.`".$custom_fields->column_name."`
+              SET `e`.`".$custom_fields->column_name."` = `ov`.`label`;";
+      $params = array();
+      $params[1] = array($custom_fields->option_group_id, 'Integer');
+      CRM_Core_DAO::executeQuery($sql, $params);
+    }
+
+    //update the option group Gemeente
+    $sql = "UPDATE `civicrm_option_value` `ov`
+            INNER JOIN `civicrm_option_group` `og` ON `ov`.`option_group_id` = `og`.`id`
+            SET `ov`.`value` = `ov`.`label`
+            WHERE `og`.`name` = 'gemeente'";
+    CRM_Core_DAO::executeQuery($sql);
+
+    return true;
+  }
+
   /**
    * Example: Run an external SQL script when the module is uninstalled
    */
