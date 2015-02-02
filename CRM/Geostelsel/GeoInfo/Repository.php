@@ -45,7 +45,7 @@ class CRM_Geostelsel_GeoInfo_Repository {
     $table = $config->getGeostelselCustomGroup('table_name');
     $afdeling = $config->getAfdelingsField('column_name');
     $regio = $config->getRegioField('column_name');
-    $provincie = $config->getProvincieField('column_name');
+    $provincie_field = $config->getProvincieField('column_name');
     $manual = $config->getHandmatigeInvoerField('column_name');
     
     $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `{$table}` WHERE `entity_id` = %1", array(1 => array($contact_id, 'Integer')));
@@ -66,7 +66,7 @@ class CRM_Geostelsel_GeoInfo_Repository {
     
     $params[$afdeling] = $data->getAfdelingsContactId() ? $data->getAfdelingsContactId() : 'NULL';
     $params[$regio] = $data->getRegioContactId() ? $data->getRegioContactId() : 'NULL';
-    $params[$provincie] = $data->getProvincieContactId() ? $data->getProvincieContactId() : 'NULL';
+    $params[$provincie_field] = $data->getProvincieContactId() ? $data->getProvincieContactId() : 'NULL';
     
     if ($existing) {
       $sql = "UPDATE {$table} SET ";
