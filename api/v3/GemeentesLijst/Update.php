@@ -33,7 +33,7 @@ function civicrm_api3_gemeentes_lijst_update($params) {
     $sql = "SELECT COUNT(*) FROM `civicrm_option_value` where `option_group_id` = %1 AND `value` = %2";
     $params = array();
     $params[1] = array($option_group_id, 'Integer');
-    $params[2] = array($key, 'string');
+    $params[2] = array($key, 'String');
     $exist = CRM_Core_DAO::singleValueQuery($sql, $params);
     if (!$exist) {
       $insert = "INSERT INTO `civicrm_option_value` (`option_group_id`, `value`, `label`, `grouping`, `is_reserved`, `is_active`) VALUES (%1, %2, %3, %4, 1, 1);";
