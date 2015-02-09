@@ -40,6 +40,9 @@ class CRM_Geostelsel_GeoInfo_Repository {
   }
   
   public function updateContact($contact_id, $gemeente, $provincie) {
+    if (empty($contact_id)) {
+      return;
+    }
     $config = CRM_Geostelsel_Config::singleton();
   
     $table = $config->getGeostelselCustomGroup('table_name');
