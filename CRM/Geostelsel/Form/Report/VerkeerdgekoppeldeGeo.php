@@ -50,7 +50,11 @@ class CRM_Geostelsel_Form_Report_VerkeerdgekoppeldeGeo extends CRM_Report_Form {
         LEFT JOIN `civicrm_contact` `afdeling` ON `gemeente`.`entity_id` = `afdeling`.`id`
         LEFT JOIN `".$config->getGeostelselCustomGroup('table_name')."` `geo` ON `c`.id = `geo`.`entity_id`
         LEFT JOIN `civicrm_contact` `geo_afdeling` ON `geo_afdeling`.`id` = `geo`.`".$config->getAfdelingsField('column_name')."`
-        WHERE `a`.is_primary = 1 AND `afdeling`.`id` != `geo_afdeling`.`id`
+        WHERE `a`.is_primary = 1
+        AND (
+          `afdeling`.`id` != `geo_afdeling`.`id`
+          OR `afdeling`.`id` IS NULL AND `geo_afdeling`.`id` IS NULL
+          )
         ORDER BY `woonplaats_gemeente` ASC, `afdeling_display_name` ASC, `geo_afdeling_display_name` ASC
         {$this->_limit}";
 
