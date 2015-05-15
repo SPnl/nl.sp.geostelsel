@@ -161,6 +161,17 @@ function geostelsel_civicrm_aclWhereClause( $type, &$tables, &$whereTables, &$co
     $where .= " AND";
   }
   $where .= " (geostelsel.`{$afdeling}` IN ({$ids}) OR geostelsel.`{$regio}` IN ({$ids}) OR geostelsel.`{$provincie}` IN ({$ids}))";
+
+  //add active membership
+  $membership_type = CRM_Geostelsel_Config_MembershipTypes::singleton();
+  $membership_table = 'civicrm_membership';
+  $tables[$membership_table] = $whereTables[$membership_table] = "LEFT JOIN {$membership_table} membership_access ON contact_a.id = membership_access.contact_id";
+  if (!empty($where)) {
+    $where .= " AND";
+  }
+  $mtype_ids = implode(", ", $membership_type->getMembershipTypeIds());
+  $mstatus_ids = implode(", ", $membership_type->getStatusIds());
+  $where .= " (membership_access.membership_type_id IN ({$mtype_ids}) AND membership_access.status_id IN ({$mstatus_ids}))";
 }
 
 /**
