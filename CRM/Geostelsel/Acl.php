@@ -79,7 +79,7 @@ class CRM_Geostelsel_Acl {
     $tables[$table] = $whereTables[$table] = "LEFT JOIN {$table} toegang_group ON contact_a.id = toegang_group.contact_id AND toegang_group.status = 'Added'";
     $ids = implode(", ", $permissioned_to_groups);
 
-    $whereClause = " (toegang_group.`{group_id}` IN ({$ids}))";
+    $whereClause = " (`toegang_group`.`group_id` IN ({$ids}))";
 
     if (!empty($where)) {
       $where .= " AND";
