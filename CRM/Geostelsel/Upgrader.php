@@ -44,6 +44,17 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
     return true;
   }
 
+  public function upgrade_1003() {
+    $this->executeCustomDataFile('xml/toegang.xml');
+    $config = CRM_Geostelsel_Config::singleton();
+    $params['is_active'] = 1;
+    $params['is_required'] = 0;
+    $params['is_searchable'] = 1;
+    $params['id'] = $config->getPermissionField('id');
+    civicrm_api3('CustomField', 'create', $params);
+    return true;
+  }
+
   /**
    * Example: Run an external SQL script when the module is uninstalled
    */

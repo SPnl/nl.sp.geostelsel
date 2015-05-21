@@ -17,7 +17,9 @@ function geostelsel_civicrm_aclGroup( $type, $contactID, $tableName, &$allGroups
 }
 
 function geostelsel_civicrm_customFieldOptions($fieldID, &$options, $detailedFormat = false ) {
+  $toegang_config = CRM_Geostelsel_Config_Toegang::singleton();
   $config = CRM_Geostelsel_Groep_Config::singleton();
+  //voeg groepen toe aan veld hoofdgroep op de afdelingskaart
   if ($fieldID == $config->getGroepCustomField('id')) {
     $group_ids = CRM_Core_PseudoConstant::group();
     $groups = CRM_Contact_BAO_Group::getGroupsHierarchy($group_ids, NULL, '&nbsp;&nbsp;', TRUE);
@@ -26,6 +28,20 @@ function geostelsel_civicrm_customFieldOptions($fieldID, &$options, $detailedFor
         $options['group_id_'.$gid]['id'] = 'group_id_'.$gid;
         $options['group_id_'.$gid]['value'] = $gid;
         $options['group_id_'.$gid]['label'] = $title;
+      } else {
+        $options[$gid] = $title;
+      }
+    }
+  }
+  //voeg groep opties toe aan het veld groep bij toegangsgegevems
+  if ($fieldID == $toegang_config->getToegangGroepCustomField('id')) {
+    $group_ids = CRM_Core_PseudoConstant::group();
+    $groups = CRM_Contact_BAO_Group::getGroupsHierarchy($group_ids, NULL, '&nbsp;&nbsp;', TRUE);
+    foreach($groups as $gid => $title) {
+      if ($detailedFormat) {
+        $options[$gid]['id'] = 'group_id_'.$gid;
+        $options[$gid]['value'] = $gid;
+        $options[$gid]['label'] = $title;
       } else {
         $options[$gid] = $title;
       }
@@ -130,48 +146,7 @@ function geostelsel_civicrm_custom($op,$groupID, $entityID, &$params ) {
 }
 
 function geostelsel_civicrm_aclWhereClause( $type, &$tables, &$whereTables, &$contactID, &$where ) {
-  if ( ! $contactID ) {
-    return;
-  }
-  
-  $config = CRM_Geostelsel_Config::singleton();
-  
-  $permissioned_to = array();  
-  $permission_table = $config->getPermissionTable('table_name');
-  $permission_field = $config->getPermissionField('column_name');
-  
-  $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `{$permission_table}` WHERE `entity_id` = %1", array(1 => array($contactID, 'Integer')));
-  while ($dao->fetch()) {
-    $permissioned_to[] = $dao->$permission_field;
-  }
-  
-  if (count($permissioned_to) == 0) {
-    return;
-  }
-  
-  $table = $config->getGeostelselCustomGroup('table_name');
-  $afdeling = $config->getAfdelingsField('column_name');
-  $regio = $config->getRegioField('column_name');
-  $provincie = $config->getProvincieField('column_name');
-  
-  $tables[$table] = $whereTables[$table] = "LEFT JOIN {$table} geostelsel ON contact_a.id = geostelsel.entity_id";
-  $ids = implode(", ", $permissioned_to);
-
-  if (!empty($where)) {
-    $where .= " AND";
-  }
-  $where .= " (geostelsel.`{$afdeling}` IN ({$ids}) OR geostelsel.`{$regio}` IN ({$ids}) OR geostelsel.`{$provincie}` IN ({$ids}))";
-
-  //add active membership
-  $membership_type = CRM_Geostelsel_Config_MembershipTypes::singleton();
-  $membership_table = 'civicrm_membership';
-  $tables[$membership_table] = $whereTables[$membership_table] = "LEFT JOIN {$membership_table} membership_access ON contact_a.id = membership_access.contact_id";
-  if (!empty($where)) {
-    $where .= " AND";
-  }
-  $mtype_ids = implode(", ", $membership_type->getMembershipTypeIds());
-  $mstatus_ids = implode(", ", $membership_type->getStatusIds());
-  $where .= " (membership_access.membership_type_id IN ({$mtype_ids}) AND membership_access.status_id IN ({$mstatus_ids}))";
+  CRM_Geostelsel_Acl::aclWhereClause($type, $tables, $whereTables, $contactID, $where);
 }
 
 /**
