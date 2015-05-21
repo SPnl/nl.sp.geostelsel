@@ -12,14 +12,16 @@ class CRM_Geostelsel_Groep_ParentGroup {
    */
   public function getParentGroupsByContact($contactID) {
     $return = $parents = $this->accessToGroups($contactID);
-    
-    $subgroups = CRM_Contact_BAO_GroupNesting::getChildGroupIds($parents);
-    $parents = CRM_Contact_BAO_GroupNesting::getParentGroupIds($parents);
-    foreach($subgroups as $sub_gid) {
-      $return[] = $sub_gid;
-    };
-    foreach($parents as $p_gid) {
-      $return[] = $p_gid;
+
+    if (count($parents)) {
+      $subgroups = CRM_Contact_BAO_GroupNesting::getChildGroupIds($parents);
+      $parents = CRM_Contact_BAO_GroupNesting::getParentGroupIds($parents);
+      foreach ($subgroups as $sub_gid) {
+        $return[] = $sub_gid;
+      };
+      foreach ($parents as $p_gid) {
+        $return[] = $p_gid;
+      }
     }
     
     return $return;
