@@ -36,6 +36,10 @@ class CRM_Geostelsel_Acl {
       return;
     }
 
+    if ($type != CRM_Core_Permission::VIEW) {
+      return;
+    }
+
     $table = $config->getGeostelselCustomGroup('table_name');
     $afdeling = $config->getAfdelingsField('column_name');
     $regio = $config->getRegioField('column_name');
@@ -72,6 +76,10 @@ class CRM_Geostelsel_Acl {
 
   protected static function toegangTotContactenVanGroep( $type, &$tables, &$whereTables, &$contactID, &$where, $permissioned_to_groups) {
     if (count($permissioned_to_groups) == 0) {
+      return;
+    }
+
+    if ($type != CRM_Core_Permission::VIEW) {
       return;
     }
 
