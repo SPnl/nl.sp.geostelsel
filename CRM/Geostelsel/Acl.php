@@ -50,7 +50,7 @@ class CRM_Geostelsel_Acl {
     //add active membership
     $membership_type = CRM_Geostelsel_Config_MembershipTypes::singleton();
     $membership_table = 'civicrm_membership';
-    $tables[$membership_table] = $whereTables[$membership_table] = "LEFT JOIN {$membership_table} membership_access ON contact_a.id = membership_access.contact_id";
+    $tables['membership_access'] = $whereTables['membership_access'] = "LEFT JOIN {$membership_table} membership_access ON contact_a.id = membership_access.contact_id";
     $mtype_ids = implode(", ", $membership_type->getMembershipTypeIds());
     $mstatus_ids = implode(", ", $membership_type->getStatusIds());
 
@@ -84,7 +84,7 @@ class CRM_Geostelsel_Acl {
     }
 
     $table = 'civicrm_group_contact';
-    $tables[$table] = $whereTables[$table] = "LEFT JOIN {$table} toegang_group ON contact_a.id = toegang_group.contact_id AND toegang_group.status = 'Added'";
+    $tables['toegang_group'] = $whereTables['toegang_group'] = "LEFT JOIN {$table} toegang_group ON contact_a.id = toegang_group.contact_id AND toegang_group.status = 'Added'";
     $ids = implode(", ", $permissioned_to_groups);
 
     $whereClause = " (`toegang_group`.`group_id` IN ({$ids}))";
