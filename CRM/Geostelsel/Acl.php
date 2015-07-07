@@ -26,18 +26,34 @@ class CRM_Geostelsel_Acl {
       }
     }
 
-    self::toegangTotContactenVanAfdeling($type, $tables, $whereTables, $contactID, $where, $toegang_tot_afdelingen);
-    self::toegangTotContactenVanGroep($type, $tables, $whereTables, $contactID, $where, $toegang_tot_groep);
+    $whereClauses = array();
+    $whereClauses[] = self::toegangTotContactenVanAfdeling($type, $tables, $whereTables, $contactID, $where, $toegang_tot_afdelingen);
+    $whereClauses[] = self::toegangTotContactenVanGroep($type, $tables, $whereTables, $contactID, $where, $toegang_tot_groep);
+    $whereClause = "";
+    foreach($whereClauses as $clause) {
+      if (strlen($clause)) {
+        if (strlen($whereClause)) {
+          $whereClause .= " OR ";
+        }
+        $whereClause .= " (".$clause.") ";
+      }
+    }
+    if (strlen($whereClause)) {
+      if (strlen($where)) {
+        $where .= " AND ";
+      }
+      $where .= " (" . $whereClause . ") ";
+    }
   }
 
   protected static function toegangTotContactenVanAfdeling( $type, &$tables, &$whereTables, &$contactID, &$where, $permissioned_to_contacts) {
     $config = CRM_Geostelsel_Config::singleton();
     if (count($permissioned_to_contacts) == 0) {
-      return;
+      return "";
     }
 
     if ($type != CRM_Core_Permission::VIEW) {
-      return;
+      return "";
     }
 
     $table = $config->getGeostelselCustomGroup('table_name');
@@ -55,7 +71,7 @@ class CRM_Geostelsel_Acl {
     $mstatus_ids = implode(", ", $membership_type->getStatusIds());
 
 
-    $whereClause = " (
+    return " (
                         (
                           geostelsel.`{$afdeling}` IN ({$ids})
                           OR geostelsel.`{$regio}` IN ({$ids})
@@ -67,32 +83,22 @@ class CRM_Geostelsel_Acl {
                           AND membership_access.status_id IN ({$mstatus_ids})
                         )
                     )";
-
-    if (!empty($where)) {
-      $where .= " OR";
-    }
-    $where .= $whereClause;
   }
 
   protected static function toegangTotContactenVanGroep( $type, &$tables, &$whereTables, &$contactID, &$where, $permissioned_to_groups) {
     if (count($permissioned_to_groups) == 0) {
-      return;
+      return "";
     }
 
     if ($type != CRM_Core_Permission::VIEW) {
-      return;
+      return "";
     }
 
     $table = 'civicrm_group_contact';
     $tables['toegang_group'] = $whereTables['toegang_group'] = "LEFT JOIN {$table} toegang_group ON contact_a.id = toegang_group.contact_id AND toegang_group.status = 'Added'";
     $ids = implode(", ", $permissioned_to_groups);
 
-    $whereClause = " (`toegang_group`.`group_id` IN ({$ids}))";
-
-    if (!empty($where)) {
-      $where .= " OR";
-    }
-    $where .= $whereClause;
+    return " (`toegang_group`.`group_id` IN ({$ids}))";
   }
 
 }
