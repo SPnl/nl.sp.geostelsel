@@ -183,6 +183,27 @@ function geostelsel_civicrm_validateForm( $formName, &$fields, &$files, &$form, 
   }  
 }
 
+/**
+ * Implementatio of hook__civicrm_tabs
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_tabs
+ */
+function geostelsel_civicrm_tabs(&$tabs, $contactID) {
+  //hide tab Tags if user has no permission to edit the contact
+  if (!CRM_Core_Permission::check('view toeganggegevens')) {
+    $config = CRM_Geostelsel_Config_Toegang::singleton();
+    $tab_id = 'custom_'.$config->getToegangCustomGroup('id');
+    foreach($tabs as $key => $tab) {
+      if ($tab['id'] == $tab_id) {
+        unset($tabs[$key]);
+      }
+    }
+  }
+}
+
+function geostelsel_civicrm_permission(&$permissions) {
+  $permissions['view toeganggegevens'] = ts('CiviCRM').': '.ts('View Toeganggegevens tab on contact summary');
+}
+
 
 function _geostelsel_force_to_run_update_cron() {
   CRM_Core_BAO_Setting::setItem('1', 'nl.sp.geostelsel', 'api.geostelsel.update.to_run');
