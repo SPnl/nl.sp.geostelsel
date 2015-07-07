@@ -69,7 +69,7 @@ class CRM_Geostelsel_Acl {
                     )";
 
     if (!empty($where)) {
-      $where .= " AND";
+      $where .= " OR";
     }
     $where .= $whereClause;
   }
@@ -90,7 +90,7 @@ class CRM_Geostelsel_Acl {
     $whereClause = " (`toegang_group`.`group_id` IN ({$ids}))";
 
     if (!empty($where)) {
-      $where .= " AND";
+      $where .= " OR";
     }
     $where .= $whereClause;
   }
