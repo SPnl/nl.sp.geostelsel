@@ -7,6 +7,10 @@ class CRM_Geostelsel_Acl {
       return;
     }
 
+    if ($type != CRM_Core_Permission::VIEW && $type != CRM_Core_Permission::VIEW_GROUPS && $type != CRM_Core_Permission::SEARCH) {
+      return;
+    }
+
     $config = CRM_Geostelsel_Config_Toegang::singleton();
     $toegang_tot_groep = array();
     $toegang_tot_afdelingen = array();
