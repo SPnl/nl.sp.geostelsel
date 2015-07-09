@@ -61,11 +61,19 @@ class CRM_Geostelsel_Acl {
     $ids = $permissioned_to_contacts;
     $ids = $ids + self::retrieveRegiosFromProvincies($ids);
     $ids = $ids + self::retrieveAfdelingenFromRegios($ids);
+
+    if (empty($ids)) {
+      return "";
+    }
+
     $ids = implode(", ", $ids);
     return "contact_a.id IN ({$ids})";
   }
 
   protected static function retrieveRegiosFromProvincies($cids) {
+    if (empty($cids)) {
+      return array();
+    }
     $config = CRM_Geostelsel_Config::singleton();
     $contact_ids = array();
     $sql = "SELECT contact_id_a
@@ -85,6 +93,9 @@ class CRM_Geostelsel_Acl {
   }
 
   protected static function retrieveAfdelingenFromRegios($cids) {
+    if (empty($cids)) {
+      return array();
+    }
     $config = CRM_Geostelsel_Config::singleton();
     $contact_ids = array();
     $sql = "SELECT contact_id_a
