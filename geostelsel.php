@@ -2,6 +2,12 @@
 
 require_once 'geostelsel.civix.php';
 
+function geostelsel_civicrm_optionValues(&$options, $name) {
+  if ($name == 'from_email_address') {
+    CRM_Geostelsel_CiviMail_FromMailAddresses::optionValues($options, $name);
+  }
+}
+
 function geostelsel_civicrm_aclGroup( $type, $contactID, $tableName, &$allGroups, &$currentGroups ) {
   if ($tableName != 'civicrm_saved_search') {
     return;
@@ -202,6 +208,7 @@ function geostelsel_civicrm_tabs(&$tabs, $contactID) {
 
 function geostelsel_civicrm_permission(&$permissions) {
   $permissions['view toeganggegevens'] = ts('CiviCRM').': '.ts('View Toeganggegevens tab on contact summary');
+  $permissions['civimail use default from addresses'] = ts('CiviMail').': '.ts('Use default FROM Addresses');
 }
 
 
