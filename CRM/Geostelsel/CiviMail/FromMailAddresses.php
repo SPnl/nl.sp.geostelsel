@@ -32,7 +32,6 @@ class CRM_Geostelsel_CiviMail_FromMailAddresses {
               OR contact_a.contact_sub_type LIKE '%{$sep}SP_Regio{$sep}%'
               OR contact_a.contact_sub_type LIKE '%{$sep}SP_Provincie{$sep}%'
                OR contact_a.contact_sub_type LIKE '%{$sep}SP_Werkgroep{$sep}%'
-               OR contact_a.contact_sub_type LIKE '%{$sep}SP_Provincie{$sep}%'
               )
             AND {$aclWhere}
             ORDER BY contact_a.sort_name";
