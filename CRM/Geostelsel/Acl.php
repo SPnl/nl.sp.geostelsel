@@ -33,17 +33,74 @@ class CRM_Geostelsel_Acl {
     foreach($whereClauses as $clause) {
       if (strlen($clause)) {
         if (strlen($whereClause)) {
-          $whereClause .= " OR ";
+          $whereClause .= " AND ";
         }
         $whereClause .= " (".$clause.") ";
       }
     }
+
+    $additinalClauses = self::toegangTotGeoContacten($type, $tables, $whereTables, $contactID, $where, $toegang_tot_afdelingen);
+    if (!empty($additinalClauses)) {
+      if (strlen($whereClause)) {
+        $whereClause = " ((" . $whereClause . ") OR (".$additinalClauses."))";
+      } else {
+        $whereClause = " (".$additinalClauses.")";
+      }
+    }
+
     if (strlen($whereClause)) {
       if (strlen($where)) {
         $where .= " AND ";
       }
       $where .= " (" . $whereClause . ") ";
     }
+  }
+
+  protected static function toegangTotGeoContacten( $type, &$tables, &$whereTables, &$contactID, &$where, $permissioned_to_contacts) {
+    //bepaal toegang tot provincie, regio en of afdeling contact en alle onderliggende contacten
+    $ids = $permissioned_to_contacts;
+    $ids = $ids + self::retrieveRegiosFromProvincies($ids);
+    $ids = $ids + self::retrieveAfdelingenFromRegios($ids);
+    $ids = implode(", ", $ids);
+    return "contact_a.id IN ({$ids})";
+  }
+
+  protected static function retrieveRegiosFromProvincies($cids) {
+    $config = CRM_Geostelsel_Config::singleton();
+    $contact_ids = array();
+    $sql = "SELECT contact_id_a
+            FROM civicrm_relationship
+            WHERE contact_id_b IN (".implode(",", $cids).")
+            AND relationship_type_id = %1
+            AND is_active = 1
+            AND (start_date <= NOW() OR start_date IS NULL)
+            AND (end_date >= NOW() OR end_date IS NULL)
+            ";
+    $params[1] = array($config->getProvincieRelationshipTypeId(), 'Integer');
+    $dao = CRM_Core_DAO::executeQuery($sql, $params);
+    while($dao->fetch()) {
+      $contact_ids[] = $dao->contact_id_a;
+    }
+    return $contact_ids;
+  }
+
+  protected static function retrieveAfdelingenFromRegios($cids) {
+    $config = CRM_Geostelsel_Config::singleton();
+    $contact_ids = array();
+    $sql = "SELECT contact_id_a
+            FROM civicrm_relationship
+            WHERE contact_id_b IN (".implode(",", $cids).")
+            AND relationship_type_id = %1
+            AND is_active = 1
+            AND (start_date <= NOW() OR start_date IS NULL)
+            AND (end_date >= NOW() OR end_date IS NULL)
+            ";
+    $params[1] = array($config->getRegioRelationshipTypeId(), 'Integer');
+    $dao = CRM_Core_DAO::executeQuery($sql, $params);
+    while($dao->fetch()) {
+      $contact_ids[] = $dao->contact_id_a;
+    }
+    return $contact_ids;
   }
 
   protected static function toegangTotContactenVanAfdeling( $type, &$tables, &$whereTables, &$contactID, &$where, $permissioned_to_contacts) {
@@ -60,7 +117,7 @@ class CRM_Geostelsel_Acl {
     $afdeling = $config->getAfdelingsField('column_name');
     $regio = $config->getRegioField('column_name');
     $provincie = $config->getProvincieField('column_name');
-    $tables[$table] = $whereTables[$table] = "LEFT JOIN {$table} geostelsel ON contact_a.id = geostelsel.entity_id";
+    $tables['geostelsel'] = $whereTables['geostelsel'] = "LEFT JOIN {$table} geostelsel ON contact_a.id = geostelsel.entity_id";
     $ids = implode(", ", $permissioned_to_contacts);
 
     //add active membership
@@ -71,18 +128,19 @@ class CRM_Geostelsel_Acl {
     $mstatus_ids = implode(", ", $membership_type->getStatusIds());
 
 
-    return " (
-                        (
-                          geostelsel.`{$afdeling}` IN ({$ids})
-                          OR geostelsel.`{$regio}` IN ({$ids})
-                          OR geostelsel.`{$provincie}` IN ({$ids})
-                        )
-                        AND
-                        (
-                          membership_access.membership_type_id IN ({$mtype_ids})
-                          AND membership_access.status_id IN ({$mstatus_ids})
-                        )
-                    )";
+    return
+      "(
+        (
+          geostelsel.`{$afdeling}` IN ({$ids})
+          OR geostelsel.`{$regio}` IN ({$ids})
+          OR geostelsel.`{$provincie}` IN ({$ids})
+        )
+        AND
+        (
+          membership_access.membership_type_id IN ({$mtype_ids})
+          AND membership_access.status_id IN ({$mstatus_ids})
+        )
+      )";
   }
 
   protected static function toegangTotContactenVanGroep( $type, &$tables, &$whereTables, &$contactID, &$where, $permissioned_to_groups) {
@@ -94,11 +152,25 @@ class CRM_Geostelsel_Acl {
       return "";
     }
 
-    $table = 'civicrm_group_contact';
-    $tables['toegang_group'] = $whereTables['toegang_group'] = "LEFT JOIN {$table} toegang_group ON contact_a.id = toegang_group.contact_id AND toegang_group.status = 'Added'";
     $ids = implode(", ", $permissioned_to_groups);
+    $dao = CRM_Core_DAO::executeQuery("SELECT * FROM civicrm_group where id IN (".$ids.")");
+    $clauses = array();
+    while ($dao->fetch()) {
+      $selects = unserialize($dao->select_tables);
+      foreach($selects as $table => $join) {
+        $tables[$table] = $join;
+      }
+      $wheres = unserialize($dao->where_tables);
+      foreach($wheres as $table => $join) {
+        $whereTables[$table] = $join;
+      }
+      $clauses[] = $dao->where_clause;
+    }
 
-    return " (`toegang_group`.`group_id` IN ({$ids}))";
+    if (!empty($clauses)) {
+      return " ( ".implode(" AND ", $clauses)." ) ";
+    }
+    return "";
   }
 
 }
