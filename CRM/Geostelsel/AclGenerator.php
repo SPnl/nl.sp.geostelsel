@@ -1,13 +1,10 @@
 <?php
+// De functies om de clause zelf te genereren op basis van alle geostelsel-informatie zijn voorlopig hier gebleven. De feitelijke aanroep en de beslissing wanneer er iets mee gedaan wordt vindt nu plaats in nl.sp.accesscontrol.
 
-class CRM_Geostelsel_Acl {
+class CRM_Geostelsel_AclGenerator {
 
-  public static function aclWhereClause( $type, &$tables, &$whereTables, &$contactID, &$where ) {
+  public static function generateWhereClause( $type, &$tables, &$whereTables, &$contactID, &$where ) {
     if ( ! $contactID ) {
-      return;
-    }
-
-    if ($type != CRM_Core_Permission::VIEW && $type != CRM_Core_Permission::VIEW_GROUPS && $type != CRM_Core_Permission::SEARCH) {
       return;
     }
 
@@ -124,10 +121,6 @@ class CRM_Geostelsel_Acl {
       return "";
     }
 
-    if ($type != CRM_Core_Permission::VIEW) {
-      return "";
-    }
-
     $table = $config->getGeostelselCustomGroup('table_name');
     $afdeling = $config->getAfdelingsField('column_name');
     $regio = $config->getRegioField('column_name');
@@ -160,10 +153,6 @@ class CRM_Geostelsel_Acl {
 
   protected static function toegangTotContactenVanGroep( $type, &$tables, &$whereTables, &$contactID, &$where, $permissioned_to_groups) {
     if (count($permissioned_to_groups) == 0) {
-      return "";
-    }
-
-    if ($type != CRM_Core_Permission::VIEW) {
       return "";
     }
 

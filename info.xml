@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <extension key="nl.sp.geostelsel" type="module">
   <file>geostelsel</file>
-  <name>GEO Stelsel voor SP</name>
-  <description>Geo stelsel voor SP. Deze extensie is afhankelijk van org.civicoop.postcodenl</description>
+  <name>Geostelsel voor SP</name>
+  <description>Geostelsel voor SP. Deze extensie is afhankelijk van org.civicoop.postcodenl</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Jaap Jansma</author>
     <email>helpdesk@civicoop.org</email>
   </maintainer>
   <releaseDate>2014-03-28</releaseDate>
-  <version>2.0</version>
-  <develStage>alpha</develStage>
+  <version>2.1</version>
+  <develStage>beta</develStage>
   <compatibility>
     <ver>4.4</ver>
   </compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <comments></comments>
   <civix>
     <namespace>CRM/Geostelsel</namespace>
   </civix>

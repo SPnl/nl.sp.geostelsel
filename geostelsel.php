@@ -2,26 +2,6 @@
 
 require_once 'geostelsel.civix.php';
 
-function geostelsel_civicrm_optionValues(&$options, $name) {
-  if ($name == 'from_email_address') {
-    CRM_Geostelsel_CiviMail_FromMailAddresses::optionValues($options, $name);
-  }
-}
-
-function geostelsel_civicrm_aclGroup( $type, $contactID, $tableName, &$allGroups, &$currentGroups ) {
-  if ($tableName != 'civicrm_saved_search') {
-    return;
-  }
-  $group_access = new CRM_Geostelsel_Groep_ParentGroup();
-  $parent_groups = $group_access->getParentGroupsByContact($contactID);
-  foreach($parent_groups as $gid) {
-    if (isset($allGroups[$gid])) {
-      $currentGroups[] = $gid;
-    }
-  }
-  
-}
-
 function geostelsel_civicrm_customFieldOptions($fieldID, &$options, $detailedFormat = false ) {
   $toegang_config = CRM_Geostelsel_Config_Toegang::singleton();
   $config = CRM_Geostelsel_Groep_Config::singleton();
@@ -151,10 +131,6 @@ function geostelsel_civicrm_custom($op,$groupID, $entityID, &$params ) {
   }  
 }
 
-function geostelsel_civicrm_aclWhereClause( $type, &$tables, &$whereTables, &$contactID, &$where ) {
-  CRM_Geostelsel_Acl::aclWhereClause($type, $tables, $whereTables, $contactID, $where);
-}
-
 /**
  * Implementation of hook_civicrm_validateForm
  * 
@@ -188,29 +164,6 @@ function geostelsel_civicrm_validateForm( $formName, &$fields, &$files, &$form, 
     }
   }  
 }
-
-/**
- * Implementatio of hook__civicrm_tabs
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_tabs
- */
-function geostelsel_civicrm_tabs(&$tabs, $contactID) {
-  //hide tab Tags if user has no permission to edit the contact
-  if (!CRM_Core_Permission::check('view toeganggegevens')) {
-    $config = CRM_Geostelsel_Config_Toegang::singleton();
-    $tab_id = 'custom_'.$config->getToegangCustomGroup('id');
-    foreach($tabs as $key => $tab) {
-      if ($tab['id'] == $tab_id) {
-        unset($tabs[$key]);
-      }
-    }
-  }
-}
-
-function geostelsel_civicrm_permission(&$permissions) {
-  $permissions['view toeganggegevens'] = ts('CiviCRM').': '.ts('View Toeganggegevens tab on contact summary');
-  $permissions['civimail use default from addresses'] = ts('CiviMail').': '.ts('Use default FROM Addresses');
-}
-
 
 function _geostelsel_force_to_run_update_cron() {
   CRM_Core_BAO_Setting::setItem('1', 'nl.sp.geostelsel', 'api.geostelsel.update.to_run');
