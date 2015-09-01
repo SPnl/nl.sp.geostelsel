@@ -8,6 +8,8 @@ class CRM_Geostelsel_Config_MembershipTypes {
 
     private $status_ids = array();
 
+    private $decaesed_status_id;
+
     private function __construct() {
         $membership_types = array(
             'Lid SP',
@@ -34,6 +36,9 @@ class CRM_Geostelsel_Config_MembershipTypes {
           );
           $this->status_ids[] = CRM_Core_DAO::singleValueQuery($sql, $params);
         }
+
+        $sql = "SELECT id from civicrm_membership_status where name = %1";
+        $this->decaesed_status_id = CRM_Core_DAO::singleValueQuery($sql, array(1 => array('Deceased', 'String')));
     }
 
     /**
@@ -52,6 +57,10 @@ class CRM_Geostelsel_Config_MembershipTypes {
 
     public function getStatusIds() {
       return $this->status_ids;
+    }
+
+    public function getDeceasedStatusId() {
+        return $this->decaesed_status_id;
     }
 
 }

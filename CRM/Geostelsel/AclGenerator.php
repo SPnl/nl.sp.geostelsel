@@ -146,7 +146,11 @@ class CRM_Geostelsel_AclGenerator {
         AND
         (
           membership_access.membership_type_id IN ({$mtype_ids})
-          AND membership_access.status_id IN ({$mstatus_ids})
+          AND (
+            membership_access.status_id IN ({$mstatus_ids})
+            OR
+            (membership_access.status_id = '{$membership_type->getDeceasedStatusId()}' AND (membership_access.end_date >= NOW() - INTERVAL 3 MONTH))
+          )
         )
       )";
   }
