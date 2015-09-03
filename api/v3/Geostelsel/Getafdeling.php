@@ -52,7 +52,9 @@ function civicrm_api3_geostelsel_getafdeling($api_params) {
     $contact_sql = "SELECT c.id, c.display_name
                   FROM civicrm_contact c
                   LEFT JOIN `{$config->getGemeenteCustomGroup('table_name')}` `g` ON c.id = g.entity_id
-                  WHERE c.display_name LIKE %1 AND c.contact_sub_type LIKE '%Afdeling%'
+                  LEFT JOIN civicrm_entity_tag et ON c.id = et.entity_id and et.entity_table = 'civicrm_contact'
+                  LEFT JOIN civicrm_tag t on et.tag_id = t.id
+                  WHERE c.display_name LIKE %1 AND c.contact_sub_type LIKE '%Afdeling%' AND t.name = 'Erkend'
                   ".$where." ORDER BY c.display_name";
     $contactParams[1] = array('%'.$api_params['name'].'%', 'String');
     $contactDao = CRM_Core_DAO::executeQuery($contact_sql, $contactParams);
