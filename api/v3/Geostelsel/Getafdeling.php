@@ -41,13 +41,13 @@ function civicrm_api3_geostelsel_getafdeling($api_params) {
   }
 
   $dao = CRM_Core_DAO::executeQuery($sql, $postcodeParams);
-  $where = "";
+  $whereClauses = array();
   while($dao->fetch()) {
-    $where .= " OR g.gemeente = '".$dao->gemeente." (".$dao->provincie.")'";
+    $whereClauses[] .= "g.gemeente = '".$dao->gemeente." (".$dao->provincie.")'";
   }
 
   $return = array();
-  if (strlen($where)) {
+  if (count($whereClauses)) {
     $config = CRM_Geostelsel_Config::singleton();
     $contact_sql = "SELECT c.id, c.display_name
                   FROM civicrm_contact c
@@ -55,7 +55,7 @@ function civicrm_api3_geostelsel_getafdeling($api_params) {
                   LEFT JOIN civicrm_entity_tag et ON c.id = et.entity_id and et.entity_table = 'civicrm_contact'
                   LEFT JOIN civicrm_tag t on et.tag_id = t.id
                   WHERE c.contact_sub_type LIKE '%Afdeling%' AND (t.name = 'Erkend' or t.name = 'In Oprichting')
-                  ".$where." ORDER BY c.display_name";
+                  AND (".implode(" OR ", $whereClauses).") ORDER BY c.display_name";
     $contactParams = array();
     $contactDao = CRM_Core_DAO::executeQuery($contact_sql, $contactParams);
     while ($contactDao->fetch()) {
