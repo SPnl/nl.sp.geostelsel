@@ -27,17 +27,17 @@ function civicrm_api3_geostelsel_getafdeling($api_params) {
     $sql = "SELECT provincie, gemeente FROM civicrm_postcodenl where (postcode_nr = %1 and postcode_letter like %2) or gemeente like %3 or woonplaats like %4 GROUP BY provincie, gemeente";
     $postcodeParams[1] = array($postcode_nr, 'Integer');
     $postcodeParams[2] = array('%'.$postcode_letter.'%', 'String');
-    $postcodeParams[3] = array($api_params['name'].'', 'String');
-    $postcodeParams[4] = array($api_params['name'].'', 'String');
+    $postcodeParams[3] = array($api_params['name'].'%', 'String');
+    $postcodeParams[4] = array($api_params['name'].'%', 'String');
   } elseif ($postcode_nr) {
     $sql = "SELECT provincie, gemeente FROM civicrm_postcodenl where postcode_nr = %1 or gemeente like %2 or woonplaats like %3 GROUP BY provincie, gemeente";
     $postcodeParams[1] = array($postcode_nr, 'Integer');
-    $postcodeParams[2] = array($api_params['name'], 'String');
-    $postcodeParams[3] = array($api_params['name'], 'String');
+    $postcodeParams[2] = array($api_params['name'].'%', 'String');
+    $postcodeParams[3] = array($api_params['name'].'%', 'String');
   } else {
     $sql = "SELECT provincie, gemeente FROM civicrm_postcodenl where gemeente like %1 or woonplaats like %2 GROUP BY provincie, gemeente";
-    $postcodeParams[1] = array($api_params['name'], 'String');
-    $postcodeParams[2] = array($api_params['name'], 'String');
+    $postcodeParams[1] = array($api_params['name'].'%', 'String');
+    $postcodeParams[2] = array($api_params['name'].'%', 'String');
   }
 
   $dao = CRM_Core_DAO::executeQuery($sql, $postcodeParams);
@@ -54,9 +54,9 @@ function civicrm_api3_geostelsel_getafdeling($api_params) {
                   LEFT JOIN `{$config->getGemeenteCustomGroup('table_name')}` `g` ON c.id = g.entity_id
                   LEFT JOIN civicrm_entity_tag et ON c.id = et.entity_id and et.entity_table = 'civicrm_contact'
                   LEFT JOIN civicrm_tag t on et.tag_id = t.id
-                  WHERE c.display_name LIKE %1 AND c.contact_sub_type LIKE '%Afdeling%' AND (t.name = 'Erkend' or t.name = 'In Oprichting')
+                  WHERE c.contact_sub_type LIKE '%Afdeling%' AND (t.name = 'Erkend' or t.name = 'In Oprichting')
                   ".$where." ORDER BY c.display_name";
-    $contactParams[1] = array('%'.$api_params['name'].'%', 'String');
+    $contactParams = array();
     $contactDao = CRM_Core_DAO::executeQuery($contact_sql, $contactParams);
     while ($contactDao->fetch()) {
       $return[$contactDao->id] = array(
