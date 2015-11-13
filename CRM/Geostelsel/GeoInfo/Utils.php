@@ -9,7 +9,7 @@ class CRM_Geostelsel_GeoInfo_Utils {
       $params['relationship_type_id'] = $config->getRegioRelationshipTypeId();
       $params['contact_id_a'] = $afdelings_contact_id;
       $params['status_id'] = CRM_Contact_BAO_Relationship::CURRENT;
-      
+
       $relationships = CRM_Contact_BAO_Relationship::getRelationship($afdelings_contact_id, CRM_Contact_BAO_Relationship::CURRENT, 0, 0, 0, NULL, NULL, false, $params);
       if (count($relationships)) {
         $relationship = reset($relationships);

@@ -20,6 +20,42 @@
     </CustomGroup>
   </CustomGroups>
   <CustomFields>
+      <CustomField>
+          <name>link</name>
+          <label>Link met vorige</label>
+          <data_type>String</data_type>
+          <html_type>Select</html_type>
+          <is_required>0</is_required>
+          <is_searchable>0</is_searchable>
+          <is_search_range>0</is_search_range>
+          <weight>2</weight>
+          <is_active>1</is_active>
+          <is_view>0</is_view>
+          <text_length>255</text_length>
+          <note_columns>60</note_columns>
+          <note_rows>4</note_rows>
+          <column_name>link</column_name>
+          <option_group_name>access_link</option_group_name>
+          <custom_group_name>Toegangsgegevens</custom_group_name>
+      </CustomField>
+      <CustomField>
+          <name>type</name>
+          <label>Type</label>
+          <data_type>String</data_type>
+          <html_type>Select</html_type>
+          <is_required>0</is_required>
+          <is_searchable>0</is_searchable>
+          <is_search_range>0</is_search_range>
+          <weight>2</weight>
+          <is_active>1</is_active>
+          <is_view>0</is_view>
+          <text_length>255</text_length>
+          <note_columns>60</note_columns>
+          <note_rows>4</note_rows>
+          <column_name>type</column_name>
+          <option_group_name>access_type</option_group_name>
+          <custom_group_name>Toegangsgegevens</custom_group_name>
+      </CustomField>
     <CustomField>
       <name>Toegang_tot_contacten_van</name>
       <label>Toegang tot contacten van</label>
@@ -56,6 +92,40 @@
         <option_group_name>access_to_group</option_group_name>
         <custom_group_name>Toegangsgegevens</custom_group_name>
     </CustomField>
+      <CustomField>
+          <name>parent_id</name>
+          <label>Bovenliggende groep</label>
+          <data_type>Int</data_type>
+          <html_type>Text</html_type>
+          <is_required>0</is_required>
+          <is_searchable>0</is_searchable>
+          <is_search_range>0</is_search_range>
+          <weight>2</weight>
+          <is_active>1</is_active>
+          <is_view>0</is_view>
+          <text_length>255</text_length>
+          <note_columns>60</note_columns>
+          <note_rows>4</note_rows>
+          <column_name>parent_id</column_name>
+          <custom_group_name>Toegangsgegevens</custom_group_name>
+      </CustomField>
+      <CustomField>
+          <name>weight</name>
+          <label>Gewicht</label>
+          <data_type>Int</data_type>
+          <html_type>Text</html_type>
+          <is_required>0</is_required>
+          <is_searchable>0</is_searchable>
+          <is_search_range>0</is_search_range>
+          <weight>2</weight>
+          <is_active>1</is_active>
+          <is_view>0</is_view>
+          <text_length>255</text_length>
+          <note_columns>60</note_columns>
+          <note_rows>4</note_rows>
+          <column_name>weight</column_name>
+          <custom_group_name>Toegangsgegevens</custom_group_name>
+      </CustomField>
   </CustomFields>
   <OptionGroups>
     <OptionGroup>
@@ -64,5 +134,74 @@
         <is_reserved>1</is_reserved>
         <is_active>1</is_active>
     </OptionGroup>
+      <OptionGroup>
+          <name>access_link</name>
+          <title>Toegang link met vorige</title>
+          <is_reserved>1</is_reserved>
+          <is_active>1</is_active>
+      </OptionGroup>
+      <OptionGroup>
+          <name>access_type</name>
+          <title>Toegangs type</title>
+          <is_reserved>1</is_reserved>
+          <is_active>1</is_active>
+      </OptionGroup>
   </OptionGroups>
+    <OptionValues>
+        <OptionValue>
+            <label>Ook met contacten die...</label>
+            <value>OR</value>
+            <name>OR</name>
+            <is_default>1</is_default>
+            <weight>1</weight>
+            <is_optgroup>0</is_optgroup>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <option_group_name>access_link</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Inclusief contacten die...</label>
+            <value>AND</value>
+            <name>AND</name>
+            <is_default>1</is_default>
+            <weight>1</weight>
+            <is_optgroup>0</is_optgroup>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <option_group_name>access_link</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Lid van afdeling</label>
+            <value>AfdelingMember</value>
+            <name>AfdelingMember</name>
+            <is_default>1</is_default>
+            <weight>1</weight>
+            <is_optgroup>0</is_optgroup>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <option_group_name>access_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Groep</label>
+            <value>GroupMember</value>
+            <name>GroupMember</name>
+            <is_default>1</is_default>
+            <weight>1</weight>
+            <is_optgroup>0</is_optgroup>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <option_group_name>access_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Groupeer</label>
+            <value>Grouping</value>
+            <name>Grouping</name>
+            <is_default>1</is_default>
+            <weight>1</weight>
+            <is_optgroup>0</is_optgroup>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <option_group_name>access_type</option_group_name>
+        </OptionValue>
+    </OptionValues>
 </CustomData>

@@ -55,6 +55,18 @@ class CRM_Geostelsel_Upgrader extends CRM_Geostelsel_Upgrader_Base {
     return true;
   }
 
+  public function upgrade_1004() {
+    $this->executeCustomDataFile('xml/toegang.xml');
+    return true;
+  }
+
+  public function upgrade_1005() {
+    CRM_Core_DAO::executeQuery("UPDATE civicrm_value_toegangsgegevens SET link = 'OR'");
+    CRM_Core_DAO::executeQuery("UPDATE civicrm_value_toegangsgegevens SET type = 'AfdelingMember' WHERE toegang_tot_contacten_van IS NOT NULL and toegang_tot_contacten_van != ''");
+    CRM_Core_DAO::executeQuery("UPDATE civicrm_value_toegangsgegevens SET type = 'GroupMember' WHERE (type IS NULL or type = '') AND group_id IS NOT NULL and group_id != ''");
+    return true;
+  }
+
   /**
    * Example: Run an external SQL script when the module is uninstalled
    */
