@@ -149,7 +149,7 @@
   </OptionGroups>
     <OptionValues>
         <OptionValue>
-            <label>Ook met contacten die...</label>
+            <label>En contacten die ook</label>
             <value>OR</value>
             <name>OR</name>
             <is_default>1</is_default>
@@ -160,7 +160,7 @@
             <option_group_name>access_link</option_group_name>
         </OptionValue>
         <OptionValue>
-            <label>Inclusief contacten die...</label>
+            <label>Waarvan de contacten ook nog</label>
             <value>AND</value>
             <name>AND</name>
             <is_default>1</is_default>
@@ -171,7 +171,7 @@
             <option_group_name>access_link</option_group_name>
         </OptionValue>
         <OptionValue>
-            <label>Lid van afdeling</label>
+            <label>Lid van afdeling zijn</label>
             <value>AfdelingMember</value>
             <name>AfdelingMember</name>
             <is_default>1</is_default>
@@ -182,7 +182,7 @@
             <option_group_name>access_type</option_group_name>
         </OptionValue>
         <OptionValue>
-            <label>Groep</label>
+            <label>Lid van groep zijn</label>
             <value>GroupMember</value>
             <name>GroupMember</name>
             <is_default>1</is_default>

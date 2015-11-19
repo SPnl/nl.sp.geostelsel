@@ -2,6 +2,38 @@
 
 require_once 'geostelsel.civix.php';
 
+function geostelsel_civicrm_tabs(&$tabs, $contactID) {
+  $config = CRM_Geostelsel_Config_Toegang::singleton();
+
+  //unset the tab for iban accounts via custom fields and set our own tab for
+  //display the iban accounts
+  $tab_id = 'custom_'.$config->getToegangCustomGroup('id');
+  $tabExists = false;
+  $weight = 0;
+  $count = 0;
+  foreach($tabs as $key => $tab) {
+    if ($tab['id'] == $tab_id) {
+      unset($tabs[$key]);
+      $weight = $tab['weight'];
+      $count = $tab['count'];
+      $tabExists = true;
+    }
+  }
+
+  if ($tabExists) {
+    $url = CRM_Utils_System::url('civicrm/contact/toegangsgegevens', "reset=1&cid=$contactID&snippet=1");
+    //Count rules
+    $tabs[] = array(
+      'id' => 'toegangsgegevens',
+      'url' => $url,
+      'count' => $count,
+      'title' => ts('Toegangsgegevens'),
+      'weight' => $weight,
+    );
+  }
+
+}
+
 function geostelsel_civicrm_customFieldOptions($fieldID, &$options, $detailedFormat = false ) {
   $toegang_config = CRM_Geostelsel_Config_Toegang::singleton();
   $config = CRM_Geostelsel_Groep_Config::singleton();

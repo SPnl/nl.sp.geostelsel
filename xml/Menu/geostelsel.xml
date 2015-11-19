@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/contact/toegangsgegevens</path>
+    <page_callback>CRM_Geostelsel_Page_Toegangsgegevens</page_callback>
+    <title>Toegangsgegevens</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>
