@@ -45,6 +45,22 @@ class CRM_Geostelsel_Groep_ParentGroup {
     
     return $return;
   }
+
+  public function parentGroups() {
+    $group_config = CRM_Geostelsel_Groep_Config::singleton();
+    $group_table = $group_config->getGroepCustomGroup('table_name');
+    $group_field = $group_config->getGroepCustomField('column_name');
+
+    $sql = "SELECT `{$group_table}`.`{$group_field}` AS `group_id` FROM `{$group_table}` INNER JOIN `civicrm_contact` as contact_a ON `{$group_table}`.`entity_id` = `contact_a`.`id`  WHERE contact_a.is_deleted = '0' and `{$group_table}`.`{$group_field}` is not null";
+    $dao = CRM_Core_DAO::executeQuery($sql);
+
+    $return = array();
+    while($dao->fetch()) {
+      $return[] = $dao->group_id;
+    }
+
+    return $return;
+  }
   
 }
 
