@@ -81,10 +81,14 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
     $tree = self::buildTree($contactID);
     $whereClauses = self::buildWhereFromTree($tree, $tables, $whereTables);
     if (strlen($whereClauses)) {
-      if (strlen($where)) {
-        $where .= " OR ";
+      if (strlen($where) && stripos($where, " ( ( ") === 0) {
+      	$where = substr($where, 0, -2);
+      	$where .= " OR ( ".$whereClauses." ) ) ";
+      } elseif (strlen($where)) {
+        $where .= " OR (".$whereClauses.")";
+      } else {
+      	$where .= " (".$whereClauses.")";
       }
-      $where .= " (".$whereClauses.")";
     }
   }
 
