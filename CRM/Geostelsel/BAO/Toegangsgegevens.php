@@ -168,9 +168,20 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
     $mtype_ids = implode(", ", $membership_type->getMembershipTypeIds());
     $mstatus_ids = implode(", ", $membership_type->getStatusIds());
 
-
-    return "
-    (
+    $contact_sub_type = CRM_Core_DAO::singleValueQuery("SELECT contact_sub_type from civicrm_contact where id = %1", array(1=>array($afdeling_id, 'Integer')));
+    if (stristr($contact_sub_type, CRM_Core_DAO::VALUE_SEPARATOR."SP_Landelijk".CRM_Core_DAO::VALUE_SEPARATOR)) {
+      return "
+      (
+        membership_access.membership_type_id IN ({$mtype_ids})
+        AND (
+          membership_access.status_id IN ({$mstatus_ids})
+          OR
+          (membership_access.status_id = '{$membership_type->getDeceasedStatusId()}' AND (membership_access.end_date >= NOW() - INTERVAL 3 MONTH))
+        )
+      ) OR contact_a.id = {$afdeling_id}";
+    } else {
+      return "
+      (
         (
           geostelsel.`{$afdeling}` = {$afdeling_id}
           OR geostelsel.`{$regio}` = {$afdeling_id}
@@ -186,6 +197,7 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
           )
         )
       ) OR contact_a.id = {$afdeling_id}";
+    }
   }
 
   public static function getTypeOptions() {
@@ -197,7 +209,7 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
   public static function getContactOptions() {
     $return = array();
     $return[] = '';
-    $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_contact` WHERE `contact_sub_type` LIKE '%SP_Afdeling%' OR `contact_sub_type` LIKE '%SP_Regio%' OR `contact_sub_type` LIKE '%SP_Provincie%' ORDER BY `display_name`");
+    $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_contact` WHERE `contact_sub_type` LIKE '%SP_Afdeling%' OR `contact_sub_type` LIKE '%SP_Regio%' OR `contact_sub_type` LIKE '%SP_Provincie%' OR `contact_sub_type` LIKE '%SP_Landelijk%' ORDER BY `display_name`");
     while($dao->fetch()) {
       $return[$dao->id] = $dao->display_name;
     }
