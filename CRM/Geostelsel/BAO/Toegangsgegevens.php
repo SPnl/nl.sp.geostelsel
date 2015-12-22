@@ -217,7 +217,7 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
   }
 
   public static function getGroupOptions() {
-    $groupHierarchy = CRM_Contact_BAO_Group::getGroupsHierarchy(CRM_Core_PseudoConstant::nestedGroup(), NULL, '&nbsp;&nbsp;', TRUE);
+    $groupHierarchy = CRM_Contact_BAO_Group::getGroupsHierarchy(CRM_Core_PseudoConstant::nestedGroup(FALSE), NULL, '&nbsp;&nbsp;', TRUE);
     $return[] = '';
     $return = $return + $groupHierarchy;
     return $return;
