@@ -45,6 +45,7 @@ function civicrm_api3_geostelsel_getafdeling($api_params) {
   while($dao->fetch()) {
     $whereClauses[] .= "g.gemeente = '".CRM_Core_DAO::escapeString($dao->gemeente." (".$dao->provincie.")")."'";
   }
+  $whereClauses[] = "c.display_name LIKE '%".CRM_Core_DAO::escapeString($api_params['name'])."%'";
 
   $return = array();
   if (count($whereClauses)) {
