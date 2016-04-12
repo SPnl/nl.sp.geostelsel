@@ -13,7 +13,7 @@ class CRM_Geostelsel_Groep_ParentGroup {
   public function getParentGroupsByContact($contactID) {
     $return = $parents = $this->accessToGroups($contactID);
 
-    if (count($parents)) {
+    if (is_array($parents) && count($parents) > 0) {
       $subgroups = CRM_Contact_BAO_GroupNesting::getChildGroupIds($parents);
       $parents = CRM_Contact_BAO_GroupNesting::getParentGroupIds($parents);
       foreach ($subgroups as $sub_gid) {
@@ -40,7 +40,9 @@ class CRM_Geostelsel_Groep_ParentGroup {
     
     $return = array();
     while($dao->fetch()) {
-      $return[] = $dao->group_id;
+      if ($dao->group_id) {
+        $return[] = $dao->group_id;
+      }
     }
     
     return $return;
