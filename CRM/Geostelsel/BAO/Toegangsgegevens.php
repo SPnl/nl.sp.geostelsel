@@ -98,7 +98,11 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
       $whereClause = self::buildWhere($leaf, $tables, $whereTables);
       if (strlen($whereClause)) {
         if (strlen($whereClauses)) {
-          $whereClauses .= ' '.$leaf['link'].' ';
+          $link = $leaf['link'];
+          if (empty($link)) {
+            $link = 'OR';
+          }
+          $whereClauses .= ' '.$link.' ';
         }
         $whereClauses .= ' ('.$whereClause.')';
       }

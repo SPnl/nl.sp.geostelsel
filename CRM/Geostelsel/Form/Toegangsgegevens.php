@@ -56,7 +56,12 @@ class CRM_Geostelsel_Form_Toegangsgegevens extends CRM_Core_Form {
   }
 
   public function addRules() {
-    $this->addFormRule(array('CRM_Geostelsel_Form_Toegangsgegevens', 'validateType'));
+    if (!($this->_action & CRM_Core_Action::DELETE)) {
+      $this->addFormRule(array(
+        'CRM_Geostelsel_Form_Toegangsgegevens',
+        'validateType'
+      ));
+    }
   }
 
   static function validateType($fields) {
@@ -69,6 +74,9 @@ class CRM_Geostelsel_Form_Toegangsgegevens extends CRM_Core_Form {
       if (empty($fields['group_id'])) {
         $errors['group_id'] = ts('Select a group');
       }
+    }
+    if (empty($fields['link'])) {
+      $errors['link'] = ts('Link met vorige is vereist');
     }
 
     if (count($errors)) {
@@ -106,6 +114,9 @@ class CRM_Geostelsel_Form_Toegangsgegevens extends CRM_Core_Form {
     }
     $data['entity_id'] = $this->_submitValues['cid'];
     $data[$cg.$config->getLinkCustomField('id').$id] = $this->_submitValues['link'];
+    if (empty($data[$cg.$config->getLinkCustomField('id').$id])) {
+      $data[$cg.$config->getLinkCustomField('id').$id] = 'OR';
+    }
     $data[$cg.$config->getTypeCustomField('id').$id] = $this->_submitValues['type'];
     if ($this->_submitValues['type'] == 'AfdelingMember') {
       $data[$cg . $config->getToegangAfdelingCustomField('id') . $id] = $this->_submitValues['toegang_tot_contacten_van'];

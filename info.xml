@@ -8,8 +8,8 @@
     <author>Jaap Jansma</author>
     <email>helpdesk@civicoop.org</email>
   </maintainer>
-  <releaseDate>2016-04-12</releaseDate>
-  <version>2.2</version>
+  <releaseDate>2016-04-14</releaseDate>
+  <version>2.3</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.4</ver>
