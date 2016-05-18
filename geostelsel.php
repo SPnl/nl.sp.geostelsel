@@ -106,7 +106,7 @@ function geostelsel_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
 function geostelsel_civicrm_pre( $op, $objectName, $id, &$params ) {
   if ($objectName == 'Group') {
     //if user has not permission to manage groups then add the parents of the access groups
-    if (!CRM_Core_Permission::check('CiviCRM: administer reserved groups')) {
+    if (!CRM_Core_Permission::check('administer reserved groups')) {
       if (isset($params['created_id'])) {
         $contactID = $params['created_id'];
       } else {
