@@ -31,21 +31,24 @@ class CRM_Geostelsel_Config {
   protected $permission_field;
 
   protected function __construct() {
+
+    $cfsp = CRM_Spgeneric_CustomField::singleton();
+
     //custom group from org.civicoop.postcodenl
-    $this->postcode_custom_group = civicrm_api3('CustomGroup', 'getsingle', array('name' => 'Adresgegevens'));
-    $this->postcode_gemeeente_field = civicrm_api3('CustomField', 'getsingle', array('name' => 'Gemeente', 'custom_group_id' => $this->postcode_custom_group['id']));
+    $this->postcode_custom_group = $cfsp->getGroupByName('Adresgegevens');
+    $this->postcode_gemeeente_field = $cfsp->getField('Adresgegevens', 'Gemeente');
     
-    $this->permission_table = civicrm_api3('CustomGroup', 'getsingle', array('name' => 'Toegangsgegevens'));
-    $this->permission_field = civicrm_api3('CustomField', 'getsingle', array('name' => 'Toegang_tot_contacten_van', 'custom_group_id' => $this->permission_table['id']));
+    $this->permission_table = $cfsp->getGroupByName('Toegangsgegevens');
+    $this->permission_field = $cfsp->getField('Toegangsgegevens', 'Toegang_tot_contacten_van');
     
-    $this->geostelsel_custom_group = civicrm_api3('CustomGroup', 'getsingle', array('name' => 'Geostelsel'));
-    $this->geostelsel_handmatige_invoer = civicrm_api3('CustomField', 'getsingle', array('name' => 'Handmatige_invoer', 'custom_group_id' => $this->geostelsel_custom_group['id']));
-    $this->geostelsel_afdeling = civicrm_api3('CustomField', 'getsingle', array('name' => 'Afdeling', 'custom_group_id' => $this->geostelsel_custom_group['id']));
-    $this->geostelsel_regio = civicrm_api3('CustomField', 'getsingle', array('name' => 'Regio', 'custom_group_id' => $this->geostelsel_custom_group['id']));
-    $this->geostelsel_provincie = civicrm_api3('CustomField', 'getsingle', array('name' => 'Provincie', 'custom_group_id' => $this->geostelsel_custom_group['id']));
+    $this->geostelsel_custom_group = $cfsp->getGroupByName('Geostelsel');
+    $this->geostelsel_handmatige_invoer = $cfsp->getField('Geostelsel', 'Handmatige_invoer');
+    $this->geostelsel_afdeling = $cfsp->getField('Geostelsel', 'Afdeling');
+    $this->geostelsel_regio = $cfsp->getField('Geostelsel', 'Regio');
+    $this->geostelsel_provincie = $cfsp->getField('Geostelsel', 'Provincie');
     
-    $this->afdelings_gemeente_group = civicrm_api3('CustomGroup', 'getsingle', array('name' => 'Gemeentes'));
-    $this->afdelings_gemeente_field = civicrm_api3('CustomField', 'getsingle', array('name' => 'Gemeente', 'custom_group_id' => $this->afdelings_gemeente_group['id']));
+    $this->afdelings_gemeente_group = $cfsp->getGroupByName('Gemeentes');
+    $this->afdelings_gemeente_field = $cfsp->getField('Gemeentes', 'Gemeente');
     
     $this->regio_rel_type_id = $this->getRelationshipTypeIdByNameAB('sprel_afdeling_regio');
     $this->provincie_rel_type_id = $this->getRelationshipTypeIdByNameAB('sprel_regio_provincie');

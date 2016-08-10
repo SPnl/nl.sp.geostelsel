@@ -12,8 +12,10 @@ class CRM_Geostelsel_Groep_Config {
   
   protected function __construct() {
     $this->groep_option_group = civicrm_api3('OptionGroup', 'getsingle', array('name' => 'afdeling_groep'));
-    $this->groep_customgroup = civicrm_api3('CustomGroup', 'getsingle', array('name' => 'afdeling_groep'));
-    $this->groep_customfield = civicrm_api3('CustomField', 'getsingle', array('name' => 'afdeling_groep', 'custom_group_id' => $this->groep_customgroup['id']));
+
+    $cfsp = CRM_Spgeneric_CustomField::singleton();
+    $this->groep_customgroup = $cfsp->getGroupByName('afdeling_groep');
+    $this->groep_customfield = $cfsp->getField('afdeling_groep', 'afdeling_groep');
   }
   
   /**

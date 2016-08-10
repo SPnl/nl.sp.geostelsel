@@ -35,10 +35,12 @@ function geostelsel_civicrm_tabs(&$tabs, $contactID) {
 }
 
 function geostelsel_civicrm_customFieldOptions($fieldID, &$options, $detailedFormat = false ) {
-  $toegang_config = CRM_Geostelsel_Config_Toegang::singleton();
-  $config = CRM_Geostelsel_Groep_Config::singleton();
+
+  // Test of performance hiervan beter is, twee config-klasses worden immers verder helemaal niet gebruikt
+  $cfsp = CRM_Spgeneric_CustomField::singleton();
+
   //voeg groepen toe aan veld hoofdgroep op de afdelingskaart
-  if ($fieldID == $config->getGroepCustomField('id')) {
+  if ($fieldID == $cfsp->getFieldId('afdeling_groep', 'afdeling_groep')) {
     $group_ids = CRM_Core_PseudoConstant::group();
     $groups = CRM_Contact_BAO_Group::getGroupsHierarchy($group_ids, NULL, '&nbsp;&nbsp;', TRUE);
     foreach($groups as $gid => $title) {
@@ -52,7 +54,7 @@ function geostelsel_civicrm_customFieldOptions($fieldID, &$options, $detailedFor
     }
   }
   //voeg groep opties toe aan het veld groep bij toegangsgegevems
-  if ($fieldID == $toegang_config->getToegangGroepCustomField('id')) {
+  if ($fieldID == $cfsp->getFieldId('Toegangsgegevens', 'group_id')) {
     $group_ids = CRM_Core_PseudoConstant::group();
     $groups = CRM_Contact_BAO_Group::getGroupsHierarchy($group_ids, NULL, '&nbsp;&nbsp;', TRUE);
     foreach($groups as $gid => $title) {
