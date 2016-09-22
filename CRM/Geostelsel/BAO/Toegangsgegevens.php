@@ -8,6 +8,8 @@
  */
 class CRM_Geostelsel_BAO_Toegangsgegevens {
 
+  private static $tree = array();
+
   public static function buildTree($contact_id) {
     $type_options = self::getTypeOptions();
     $contact_options = self::getContactOptions();
@@ -78,8 +80,10 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
   }
 
   public static function generateAclWhere(&$tables, &$whereTables, &$contactID, &$where) {
-    $tree = self::buildTree($contactID);
-    $whereClauses = self::buildWhereFromTree($tree, $tables, $whereTables);
+    if (!isset(self::$tree[$contactID])) {
+      self::$tree[$contactID] = self::buildTree($contactID);
+    }
+    $whereClauses = self::buildWhereFromTree(self::$tree[$contactID], $tables, $whereTables);
     if (strlen($whereClauses)) {
       if (strlen($where) && stripos($where, " ( ( ") === 0) {
       	$where = substr($where, 0, -2);
