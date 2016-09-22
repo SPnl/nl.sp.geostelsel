@@ -35,10 +35,12 @@ function geostelsel_civicrm_tabs(&$tabs, $contactID) {
 }
 
 function geostelsel_civicrm_customFieldOptions($fieldID, &$options, $detailedFormat = false ) {
-  $toegang_config = CRM_Geostelsel_Config_Toegang::singleton();
-  $config = CRM_Geostelsel_Groep_Config::singleton();
+
+  // Test of performance hiervan beter is, twee config-klasses worden immers verder helemaal niet gebruikt
+  $cfsp = CRM_Spgeneric_CustomField::singleton();
+
   //voeg groepen toe aan veld hoofdgroep op de afdelingskaart
-  if ($fieldID == $config->getGroepCustomField('id')) {
+  if ($fieldID == $cfsp->getFieldId('afdeling_groep', 'afdeling_groep')) {
     $group_ids = CRM_Core_PseudoConstant::group();
     $groups = CRM_Contact_BAO_Group::getGroupsHierarchy($group_ids, NULL, '&nbsp;&nbsp;', TRUE);
     foreach($groups as $gid => $title) {
@@ -52,7 +54,7 @@ function geostelsel_civicrm_customFieldOptions($fieldID, &$options, $detailedFor
     }
   }
   //voeg groep opties toe aan het veld groep bij toegangsgegevems
-  if ($fieldID == $toegang_config->getToegangGroepCustomField('id')) {
+  if ($fieldID == $cfsp->getFieldId('Toegangsgegevens', 'group_id')) {
     $group_ids = CRM_Core_PseudoConstant::group();
     $groups = CRM_Contact_BAO_Group::getGroupsHierarchy($group_ids, NULL, '&nbsp;&nbsp;', TRUE);
     foreach($groups as $gid => $title) {
@@ -93,11 +95,10 @@ function geostelsel_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
     $repo = CRM_Geostelsel_GeoInfo_Repository::singleton();
     $postcode_table = $config->getPostcodeCustomGroup('table_name');
     $gemeente_field = $config->getPostcodeGemeenteCustomField('column_name');
-    $sql = "SELECT `{$postcode_table}`.`{$gemeente_field}` AS `gemeente`, `postal_code`, `contact_id` FROM `civicrm_address` INNER JOIN `{$postcode_table}` ON `civicrm_address`.`id` = `{$postcode_table}`.`entity_id` WHERE `civicrm_address`.`is_primary` = 1 AND `civicrm_address`.`id` = %1";
+    $sql = "SELECT `{$postcode_table}`.`{$gemeente_field}` AS `gemeente`, `postal_code`, `contact_id`, civicrm_address.id as address_id FROM `civicrm_address` INNER JOIN `{$postcode_table}` ON `civicrm_address`.`id` = `{$postcode_table}`.`entity_id` WHERE `civicrm_address`.`is_primary` = 1 AND `civicrm_address`.`id` = %1";
     $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($objectId, 'Integer')));
-    if ($dao->fetch()) {
-      $postcode = str_replace(" ", "", $dao->postal_code);
-      $provincie = CRM_Core_DAO::singleValueQuery("SELECT provincie from civicrm_postcodenl where postcode_nr = '".substr($postcode, 0, 4)."' and postcode_letter = '".substr($postcode, 4, 2)."' limit 0,1");
+    if ($dao->fetch() && $dao->address_id) {
+      $provincie = _geostelsel_get_province_from_address($dao->address_id);
       $repo->updateContact($dao->contact_id, $dao->gemeente, $provincie);
     }
   }
@@ -120,6 +121,22 @@ function geostelsel_civicrm_pre( $op, $objectName, $id, &$params ) {
   }
 }
 
+function _geostelsel_get_province_from_address($address_id) {
+  $sql = "SELECT civicrm_address.postal_code, civicrm_state_province.name as provincie FROM civicrm_address LEFT JOIN civicrm_state_province ON civicrm_state_province.country_id = civicrm_address.country_id AND civicrm_state_province.id = civicrm_address.state_province_id WHERE civicrm_address.id = %1";
+  $params[1] = array($address_id, 'Integer');
+  $dao = CRM_Core_DAO::executeQuery($sql, $params);
+  $provincie = "";
+  if ($dao->fetch()) {
+    if (!empty($dao->provincie)) {
+      $provincie = $dao->provincie;
+    } elseif (!empty($dao->postal_code)) {
+      $postcode = str_replace(" ", "", $dao->postal_code);
+      $provincie = CRM_Core_DAO::singleValueQuery("SELECT provincie from civicrm_postcodenl where postcode_nr = '".substr($postcode, 0, 4)."' and postcode_letter = '".substr($postcode, 4, 2)."' limit 0,1");
+    }
+  }
+  return $provincie;
+}
+
 /** 
  * Update all contacts who have this gemeente in their primary address
  * 
@@ -140,8 +157,7 @@ function geostelsel_civicrm_custom($op,$groupID, $entityID, &$params ) {
         $sql = "SELECT `contact_id`, `postal_code` FROM `civicrm_address` WHERE `is_primary` = '1' AND `id` = %1";
         $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($field['entity_id'], 'Integer')));
         if ($dao->fetch() && $dao->contact_id) {
-          $postcode = str_replace(" ", "", $dao->postal_code);
-          $provincie = CRM_Core_DAO::singleValueQuery("SELECT provincie from civicrm_postcodenl where postcode_nr = '".substr($postcode, 0, 4)."' and postcode_letter = '".substr($postcode, 4, 2)."' limit 0,1");
+          $provincie = _geostelsel_get_province_from_address($field['entity_id']);
           $repo->updateContact($dao->contact_id, $field['value'], $provincie);
         }
       }
@@ -151,11 +167,10 @@ function geostelsel_civicrm_custom($op,$groupID, $entityID, &$params ) {
       if ($field['custom_field_id'] == $config->getHandmatigeInvoerField('id') && empty($field['value'])) {
         $postcode_table = $config->getPostcodeCustomGroup('table_name');
         $gemeente_field = $config->getPostcodeGemeenteCustomField('column_name');
-        $sql = "SELECT `{$postcode_table}`.`{$gemeente_field}` AS `gemeente`, `postal_code` FROM `civicrm_address` INNER JOIN `{$postcode_table}` ON `civicrm_address`.`id` = `{$postcode_table}`.`entity_id` WHERE `civicrm_address`.`is_primary` = 1 AND `civicrm_address`.`contact_id` = %1";
+        $sql = "SELECT `{$postcode_table}`.`{$gemeente_field}` AS `gemeente`, `postal_code`, civicrm_address.id as address_id FROM `civicrm_address` INNER JOIN `{$postcode_table}` ON `civicrm_address`.`id` = `{$postcode_table}`.`entity_id` WHERE `civicrm_address`.`is_primary` = 1 AND `civicrm_address`.`contact_id` = %1";
         $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($field['entity_id'], 'Integer')));
-        if ($dao->fetch()) {
-          $postcode = str_replace(" ", "", $dao->postal_code);
-          $provincie = CRM_Core_DAO::singleValueQuery("SELECT provincie from civicrm_postcodenl where postcode_nr = '".substr($postcode, 0, 4)."' and postcode_letter = '".substr($postcode, 4, 2)."' limit 0,1");
+        if ($dao->fetch() && $dao->address_id) {
+          $provincie = _geostelsel_get_province_from_address($dao->address_id);
           $repo->updateContact($field['entity_id'], $dao->gemeente, $provincie);
         }
       }
