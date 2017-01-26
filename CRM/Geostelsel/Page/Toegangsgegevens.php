@@ -73,7 +73,7 @@ class CRM_Geostelsel_Page_Toegangsgegevens extends CRM_Core_Page_Basic {
     }
 
     $cid = CRM_Utils_Request::retrieve('cid', 'Positive', $this, FALSE, 0);
-    $values = CRM_Geostelsel_BAO_Toegangsgegevens::buildTree($cid);
+    $values = CRM_Geostelsel_BAO_Toegangsgegevens::buildTree($cid, true);
     foreach($values as $rid => $row) {
       $values[$rid]['action'] = CRM_Core_Action::formLink($links, null, array('id' => $row['id'], 'cid' => $cid));
     }

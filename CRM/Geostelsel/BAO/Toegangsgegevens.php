@@ -10,11 +10,13 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
 
   private static $tree = array();
 
-  public static function buildTree($contact_id) {
-    $type_options = self::getTypeOptions();
-    $contact_options = self::getContactOptions();
-    $group_options = self::getGroupOptions();
-    $link_options = self::getLinkOptions();
+  public static function buildTree($contact_id, $includeLabels) {
+    if ($includeLabels) {
+      $type_options = self::getTypeOptions();
+      $contact_options = self::getContactOptions();
+      $group_options = self::getGroupOptions();
+      $link_options = self::getLinkOptions();
+    }
 
     $sql = "SELECT *, 1 as is_parent FROM civicrm_value_toegangsgegevens WHERE (parent_id IS NULL or parent_id = '') AND entity_id = %1
             UNION
@@ -30,12 +32,14 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
       $value['parent_id'] = $dao->parent_id;
       $value['id'] = $dao->id;
       $value['toegang_tot_contacten_van'] = $dao->toegang_tot_contacten_van;
-      $value['group_id'] = $dao->group_id;
-      $value['toegang_tot_contacten_van_label'] = $contact_options[$dao->toegang_tot_contacten_van];
-      $value['group_id_label'] = $group_options[$dao->group_id];
       $value['weight'] = $dao->weight;
-      $value['type_label'] = $type_options[$dao->type];
-      $value['link_label'] = $link_options[$dao->link];
+      $value['group_id'] = $dao->group_id;
+      if ($includeLabels) {
+        $value['toegang_tot_contacten_van_label'] = $contact_options[$dao->toegang_tot_contacten_van];
+        $value['group_id_label'] = $group_options[$dao->group_id];
+        $value['type_label'] = $type_options[$dao->type];
+        $value['link_label'] = $link_options[$dao->link];
+      }
       $value['children'] = array();
       if ($dao->is_parent) {
         $values[] = $value;
@@ -81,9 +85,11 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
 
   public static function generateAclWhere(&$tables, &$whereTables, &$contactID, &$where) {
     if (!isset(self::$tree[$contactID])) {
-      self::$tree[$contactID] = self::buildTree($contactID);
+      self::$tree[$contactID] = self::buildTree($contactID, false);
     }
+
     $whereClauses = self::buildWhereFromTree(self::$tree[$contactID], $tables, $whereTables);
+
     if (strlen($whereClauses)) {
       if (strlen($where) && stripos($where, " ( ( ") === 0) {
       	$where = substr($where, 0, -2);
@@ -177,7 +183,47 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
     $mstatus_ids = implode(", ", $membership_type->getStatusIds());
 
     $contact_sub_type = CRM_Core_DAO::singleValueQuery("SELECT contact_sub_type from civicrm_contact where id = %1", array(1=>array($afdeling_id, 'Integer')));
-    if (stristr($contact_sub_type, CRM_Core_DAO::VALUE_SEPARATOR."SP_Landelijk".CRM_Core_DAO::VALUE_SEPARATOR)) {
+    $geostelsel_query = "";
+    if (stristr($contact_sub_type, CRM_Core_DAO::VALUE_SEPARATOR."SP_Provincie".CRM_Core_DAO::VALUE_SEPARATOR)) {
+      $geostelsel_query = "
+      membership_access.contact_id IN (
+        SELECT geostelsel.entity_id 
+        FROM {$table} geostelsel 
+        WHERE geostelsel.`{$provincie}` = {$afdeling_id}
+      )";
+    } elseif (stristr($contact_sub_type, CRM_Core_DAO::VALUE_SEPARATOR."SP_Regio".CRM_Core_DAO::VALUE_SEPARATOR)) {
+      $geostelsel_query = "
+      membership_access.contact_id IN (
+        SELECT geostelsel.entity_id 
+        FROM {$table} geostelsel 
+        WHERE geostelsel.`{$regio}` = {$afdeling_id}
+      )";
+    } elseif (stristr($contact_sub_type, CRM_Core_DAO::VALUE_SEPARATOR."SP_Afdeling".CRM_Core_DAO::VALUE_SEPARATOR)) {
+      $geostelsel_query = "
+      membership_access.contact_id IN (
+        SELECT geostelsel.entity_id 
+        FROM {$table} geostelsel 
+        WHERE geostelsel.`{$afdeling}` = {$afdeling_id}
+      )";
+    }
+
+    if (strlen($geostelsel_query)) {
+      $geostelsel_query = " AND ".$geostelsel_query;
+    }
+
+    return "
+      (
+        contact_a.id IN (
+            SELECT membership_access.contact_id 
+            FROM {$membership_table} membership_access
+            WHERE membership_access.membership_type_id IN ({$mtype_ids})
+            AND (membership_access.status_id IN ({$mstatus_ids}) OR (membership_access.status_id = '{$membership_type->getDeceasedStatusId()}' AND membership_access.end_date >= NOW() - INTERVAL 3 MONTH))
+            {$geostelsel_query}
+        )
+        OR contact_a.id = {$afdeling_id}
+      )";
+
+    /*if (stristr($contact_sub_type, CRM_Core_DAO::VALUE_SEPARATOR."SP_Landelijk".CRM_Core_DAO::VALUE_SEPARATOR)) {
       return "
       contact_a.id IN (
         SELECT geostelsel.entity_id 
@@ -198,7 +244,7 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
         AND (membership_access.status_id IN ({$mstatus_ids}) OR (membership_access.status_id = '{$membership_type->getDeceasedStatusId()}' AND membership_access.end_date >= NOW() - INTERVAL 3 MONTH))
       )
       OR contact_a.id = {$afdeling_id}";
-    }
+    }*/
   }
 
   public static function getTypeOptions() {
