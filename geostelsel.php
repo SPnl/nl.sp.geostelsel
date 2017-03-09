@@ -245,7 +245,7 @@ function geostelsel_civicrm_install() {
   $error = false;
   $isPostcodeNLInstalled = false;
   try {
-    $extensions = civicrm_api3('Extension', 'get');  
+    $extensions = civicrm_api3('Extension', 'get', array('options' => array('limit' => false)));
     foreach($extensions['values'] as $ext) {
       if ($ext['status'] == 'installed') {
         switch ($ext['key']) {
