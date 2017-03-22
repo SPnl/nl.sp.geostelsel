@@ -122,19 +122,34 @@ function geostelsel_civicrm_pre( $op, $objectName, $id, &$params ) {
 }
 
 function _geostelsel_get_province_from_address($address_id) {
-  $sql = "SELECT civicrm_address.postal_code, civicrm_state_province.name as provincie FROM civicrm_address LEFT JOIN civicrm_state_province ON civicrm_state_province.country_id = civicrm_address.country_id AND civicrm_state_province.id = civicrm_address.state_province_id WHERE civicrm_address.id = %1";
+  $sql = "SELECT civicrm_address.postal_code, civicrm_address.state_province_id as state_province_id FROM civicrm_address WHERE civicrm_address.id = %1";
   $params[1] = array($address_id, 'Integer');
   $dao = CRM_Core_DAO::executeQuery($sql, $params);
   $provincie = "";
   if ($dao->fetch()) {
-    if (!empty($dao->provincie)) {
-      $provincie = $dao->provincie;
-    } elseif (!empty($dao->postal_code)) {
+    if (!empty($dao->state_province_id)) {
+      $provincie = _geostelsel_get_ducth_provincie_name_by_id($dao->state_province_id);
+    }
+
+    if (empty($provincie) && !empty($dao->postal_code)) {
       $postcode = str_replace(" ", "", $dao->postal_code);
       $provincie = CRM_Core_DAO::singleValueQuery("SELECT provincie from civicrm_postcodenl where postcode_nr = '".substr($postcode, 0, 4)."' and postcode_letter = '".substr($postcode, 4, 2)."' limit 0,1");
     }
   }
   return $provincie;
+}
+
+function _geostelsel_get_ducth_provincie_name_by_id($state_province_id) {
+  $result = civicrm_api3('Address', 'getoptions', array(
+    'sequential' => 1,
+    'field' => "state_province_id",
+  ));
+  foreach($result['values'] as $state_province) {
+    if ($state_province['key'] == $state_province_id) {
+      return $state_province['value'];
+    }
+  }
+  return false;
 }
 
 /** 
