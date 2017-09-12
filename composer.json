@@ -1,0 +1,13 @@
+{
+    "name": "spnl/nl.sp.geostelsel",
+    "description": "Geostelsel voor SP. Deze extensie is afhankelijk van org.civicoop.postcodenl",
+    "type": "civicrm-module",
+    "license": "AGPL-3.0",
+    "authors": [
+        {
+            "name": "Jaap Jansma",
+            "email": "helpdesk@civicoop.org"
+        }
+    ],
+    "require": {}
+}
