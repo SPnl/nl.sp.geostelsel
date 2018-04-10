@@ -32,6 +32,16 @@ class CRM_Geostelsel_Config_Toegang {
     }
     return self::$singleton;
   }
+	
+	public static function accessToToegangsgegevensCustomGroup() {
+		try {
+			$accessToCustomGroup = civicrm_api3('CustomGroup', 'getsingle', array('check_permissions' => 1, 'name' => 'Toegangsgegevens'));
+			return true;
+		} catch (Exception $e) {
+			return false;
+		}
+		return false;
+	}
 
   public function getToegangCustomGroup($key='id') {
     return $this->toegang_custom_group[$key];
