@@ -16,6 +16,21 @@ class CRM_Geostelsel_Page_Toegangsgegevens extends CRM_Core_Page_Basic {
     $cid = CRM_Utils_Request::retrieve('cid', 'Positive', $this, FALSE, 0);
     return 'cid='.$cid.'&selectedChild=toegangsgegevens&reset=1';
   }
+	
+	
+  public function run() {
+		if (!CRM_Geostelsel_Config_Toegang::accessToToegangsgegevensCustomGroup()) {
+  		CRM_Core_Session::setStatus('U hebt geen toegang tot deze pagina.', '', 'info');
+	    $referer = CRM_Utils_System::refererPath();
+	    if ($referer && strpos($referer, $_SERVER['REQUEST_URI']) === false) {
+	      CRM_Utils_System::redirect($referer);
+	    }
+	    else {
+	      CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/dashboard'));
+	    }
+  	}
+		return parent::run();
+	}
 
   /**
    * Get action Links
