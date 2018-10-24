@@ -217,7 +217,7 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
   public static function getContactOptions() {
     $return = array();
     $return[] = '';
-    $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_contact` WHERE `contact_sub_type` LIKE '%SP_Afdeling%' OR `contact_sub_type` LIKE '%SP_Regio%' OR `contact_sub_type` LIKE '%SP_Provincie%' OR `contact_sub_type` LIKE '%SP_Landelijk%' ORDER BY `display_name`");
+    $dao = CRM_Core_DAO::executeQuery("SELECT id, display_name FROM `civicrm_contact` WHERE `contact_sub_type` LIKE '%SP_Afdeling%' OR `contact_sub_type` LIKE '%SP_Regio%' OR `contact_sub_type` LIKE '%SP_Provincie%' OR `contact_sub_type` LIKE '%SP_Landelijk%' ORDER BY `display_name`");
     while($dao->fetch()) {
       $return[$dao->id] = $dao->display_name;
     }
