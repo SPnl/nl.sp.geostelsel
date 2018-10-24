@@ -136,7 +136,7 @@ class CRM_Geostelsel_BAO_Toegangsgegevens {
   }
 
   public static function getWhereForGroup($group_id, &$tables, &$whereTables) {
-    $dao = CRM_Core_DAO::executeQuery("SELECT * FROM civicrm_group where id = ".$group_id);
+    $dao = CRM_Core_DAO::executeQuery("SELECT select_tables, where_tables, where_clause FROM civicrm_group where id = ".$group_id);
     $clauses = array();
     while ($dao->fetch()) {
       if (empty($dao->where_clause)) {
