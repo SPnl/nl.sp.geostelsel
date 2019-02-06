@@ -116,7 +116,7 @@ function geostelsel_civicrm_pre( $op, $objectName, $id, &$params ) {
       }
       
       $group_access = new CRM_Geostelsel_Groep_ParentGroup();
-      $params['parents'] = implode(",",$group_access->accessToGroups($contactID));
+      $params['parents'] = $group_access->accessToGroups($contactID);
     }
   }
 }
@@ -357,3 +357,4 @@ function geostelsel_civicrm_caseTypes(&$caseTypes) {
 function geostelsel_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _geostelsel_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
+
