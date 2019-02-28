@@ -114,9 +114,14 @@ function geostelsel_civicrm_pre( $op, $objectName, $id, &$params ) {
         $session = CRM_Core_Session::singleton();
         $contactID = $session->get('userID');
       }
-      
+
       $group_access = new CRM_Geostelsel_Groep_ParentGroup();
-      $params['parents'] = $group_access->accessToGroups($contactID);
+      $parents = $group_access->accessToGroups($contactID);
+      if (!isset($params['parents']) || !in_array($params['parents'], $parents)) {
+          $params['parents'] = implode(',', $parents);
+      }
+
+
     }
   }
 }
