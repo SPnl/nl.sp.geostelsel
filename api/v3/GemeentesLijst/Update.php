@@ -36,7 +36,7 @@ function civicrm_api3_gemeentes_lijst_update($params) {
     $params[2] = array($key, 'String');
     $exist = CRM_Core_DAO::singleValueQuery($sql, $params);
     if (!$exist) {
-      $insert = "INSERT INTO `civicrm_option_value` (`option_group_id`, `value`, `label`, `grouping`, `is_reserved`, `is_active`) VALUES (%1, %2, %3, %4, 1, 1);";
+      $insert = "INSERT INTO `civicrm_option_value` (`option_group_id`, `value`, `label`, `grouping`, `weight`, `is_reserved`, `is_active`) VALUES (%1, %2, %3, %4, 0, 1, 1);";
       $grouping = $gemeentes->provincie;
 
       CRM_Core_DAO::executeQuery($insert, array(
