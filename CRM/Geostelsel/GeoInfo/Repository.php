@@ -110,6 +110,13 @@ class CRM_Geostelsel_GeoInfo_Repository {
     if ($dao->fetch()) {
       return $dao->entity_id;
     }
+    else {
+      // Try to find with spaces instead of stripes
+        $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array(str_replace('-', ' ', $gemeente), 'String')));
+        if ($dao->fetch()) {
+            return $dao->entity_id;
+        }
+    }
     return false;
   }
 
